@@ -101,14 +101,15 @@ sub new                    #05/10/99 3:13:PM
 
     if ( not defined $currency and $class =~ /$PACKAGE\:\:([A-Z]{3})/ )
     {
-	# must be one of our subclasses
-	$currency = $1;
+        # must be one of our subclasses
+        $currency = $1;
     }
 
     if ( defined $currency )    #override default currency type
     {
         unless ( defined $LC_MONETARY->{$currency} ) {
             eval "require Math::Currency::$currency";
+            unknown_currency($currency) if $@;
         }
         $format = $LC_MONETARY->{$currency};
     }
@@ -302,6 +303,27 @@ sub localize    #08/17/02 7:58:PM
       : 0;    # so you can test to see if locale was effective
 }
 
+############################################################################
+sub unknown_currency #02/03/05 4:37am
+############################################################################
+
+{
+    my ($currency) = @_;
+    open LOCALES, "locale -a |";
+    while ( <LOCALES> ) {
+        chomp;
+        setlocale(LC_ALL,$_);
+        my $localeconv = POSIX::localeconv();
+        if ( defined $localeconv->{'int_curr_symbol'} 
+             and $localeconv->{'int_curr_symbol'} =~ /$currency/ ) {
+            my $format = \$LC_MONETARY->{$currency};
+            Math::Currency->localize($format);
+            last;
+        }
+    }
+    close LOCALES;
+}
+
 # Autoload methods go after =cut, and are processed by the autosplit program.
 
 1;
@@ -343,8 +365,8 @@ point math, it is important to understand how the initial value passed to new()
 may have nasty side effects if done improperly.  Most of the time, the following
 two objects are identical:
 
-	$cur1 = new Math::Currency 1000.01;
-	$cur2 = new Math::Currency "1000.01";
+        $cur1 = new Math::Currency 1000.01;
+        $cur2 = new Math::Currency "1000.01";
 
 However, only the second is guaranteed to do what you think it should do.  The
 reason for that lies in how Perl treats bare numbers as opposed to strings.  The
@@ -379,7 +401,9 @@ There are currently four predefined Locale formats:
 
 These currency formats are implemented using subclasses for easy extension 
 (see L<Custom Locales> for details on creating new subclasses for
-unsupported locales).
+unsupported locales).  In particular, you may want to delete and recreate
+the EUR subclass, since the EUR "standard" permits the use of decimal and 
+grouping seperators (commas and periods) that vary by country.
 
 If you want to use any locale other than your default, there are two
 different ways to specify which currency format you wish to use, with
@@ -417,7 +441,7 @@ rules, create the objects directly using the subclass:
 =head2 Currency Symbol
 
 The locale definition includes two different Currency Symbol strings: one
-is the native character(s), like $ or £ or DM; the other is the three
+is the native character(s), like $ or £ or ¥; the other is the three
 character string defined by the ISO4217 specification followed by the
 normal currency separation character (frequently space).  The default
 behavior is to always display the native CURRENCY_SYMBOL unless a global
@@ -429,7 +453,7 @@ where the INT_CURR_SYMBOL text will used instead.
 
 =head2 Custom Locales
 
-The included scripts, new_currency, will automatically create a new
+The included file, scripts/new_currency, will automatically create a new
 currency formatting subclass, based on your current locale, or any
 arbitrary locale supported by your operating system.  For most unix-like
 O/S's, the following command will list the locale files installed:
@@ -478,7 +502,7 @@ at any time by using:
 If you don't want to always have to remember to reinitialize the POSIX settings
 when you switch locales, you can set the global parameter:
 
-	$Math::Currency::always_init = 1;
+    $Math::Currency::always_init = 1;
 
 and every single time a M::C object is printed, the global $FORMAT will be
 updated to the locale current at that time.  This may be a performance hit.  It
@@ -542,7 +566,7 @@ parameters.  For example:
 
 Or you can also set individual elements of the current global format:
 
-   Math::Currency->format('CURRENCY_SYMBOL',' Bucks'); # global changed
+    Math::Currency->format('CURRENCY_SYMBOL',' Bucks'); # global changed
 
 The [NP]_SIGN_POSN parameter determines how positive and negative signs are
 displayed.  [NP]_CS_PRECEEDS determines where the currency symbol is shown.
