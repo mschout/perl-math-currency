@@ -4,7 +4,7 @@
 # PURPOSE:	Perform currency calculations without floating point
 #
 #------------------------------------------------------------------------------
-#   Copyright (c) 2001 John Peacock
+#   Copyright (c) 2001-2005 John Peacock
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file,
@@ -421,7 +421,9 @@ program, use this mode:
   my $euros = Math::Currency->new("1.23", "EUR"); # different format
 
 The last line above will automatically load the applicable subclass and
-use that formatting for that specific object.
+use that formatting for that specific object.  These formats can either use
+a pre-generated subclass or will automatically generate an automatic
+L<custom subclass>.
 
 =back
 
@@ -451,7 +453,7 @@ parameter is set:
 
 where the INT_CURR_SYMBOL text will used instead.
 
-=head2 Custom Locales
+=head2 Custom Subclass
 
 The included file, scripts/new_currency, will automatically create a new
 currency formatting subclass, based on your current locale, or any
@@ -461,12 +463,18 @@ O/S's, the following command will list the locale files installed:
     locale -a
 
 and any of those installed locales can [potentially] be used to create a
-new locale formatting file.  It is not I<necessary> to do this, since using
-the L<format> command to switch to a locale which doesn't already have a
-subclass defined for it will attempt to generate a locale format on the
-fly.  However, if you are using this locale on a regular basis, it is
-faster to generate the subclass and install it (especially if you are using
-this module on a web server).
+new locale formatting file. 
+
+It is not I<necessary> to do this, since using the L<format> command to
+switch to a locale which doesn't already have a subclass defined for it
+will attempt to generate a locale format on the fly.  However, it should be
+noted that the automated generation method will merely look for the first
+locales that uses the request INT_CURR_SYMBOL.  There may be several locales
+which use that same currency symbol, with subtle differences (this is
+especially true of the EUR format), so it is best to pre-generate all
+of the POSIX currency subclasses you expect, based on the locales you wish
+to support, to utilize when installing this module, instead of relying on
+the autogeneration methods.
 
 To create a new locale formatting subclass, change to the top level build
 directory for Math::Currency and run the following command:
@@ -477,8 +485,9 @@ where xx_XX is the locale name obtained from the `locale -a` command.  This
 will create a new locale subclass in the lib/Math/Currency/ directory, and
 this file will be installed when `./Build install` is next run.
 
-The new_currency script will function whether or not the current version of
-Math::Currency is installed, so you can build all of your commonly used
+The new_currency script will function from within the current build
+directory, and doesn't depend the current version of Math::Currency 
+being already installed, so you can build all of your commonly used
 locale files and install them at once.
 
 =head2 Global Format

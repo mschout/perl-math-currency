@@ -70,13 +70,13 @@ $dollars->format(''); # defined but false
 ok ( $dollars eq '$20.01', "default format restored" );
 
 $euros = Math::Currency->new( -29.95, 'EUR');
-ok ( $euros eq '¤-29,95', "foreign currency" );
+ok ( $euros eq '-¤29,95', "foreign currency" );
 $newdm = $euros->new(-29.95);
 ok ( $euros == $newdm, "two object equality (numeric)" );
 ok ( $euros eq $newdm, "two object equality (string)" );
 
 $pounds = Math::Currency->new( 98994.95, 'GBP');
-ok ( $pounds eq '£98994.95', "changes to object format" );
+ok ( $pounds eq '£98,994.95', "changes to object format" );
 
 $newpounds = $pounds + 100000;
 

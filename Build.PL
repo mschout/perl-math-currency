@@ -15,6 +15,9 @@ my $class = Module::Build->subclass
 my $m = $class->new(
     module_name     => 'Math::Currency',
     license         => 'perl',
+    requires        => {
+	'Math::BigFloat' => '1.47',
+    },
 );
 $m->create_build_script;
 
