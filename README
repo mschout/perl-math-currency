@@ -11,28 +11,26 @@ more details.
 
 To install, do the usual (as non-root):
 
-        perl Makefile.PL
-        make
-        make test
+        perl Build.PL
+        ./Build
+        ./Build test
 
 You can alternately run
 
-	make test TEST_VERBOSE=1
+	./Build test TEST_VERBOSE=1
 
 to see the actual tests being run, as well as some example outputs.
 
 Then to install the module (as root):
 
-        make install
+        ./Build install
 
-NOTE:  If you are not running Perl 5.8.0, you must install at least Math::BigFloat 1.27 before
-installing this module.  You can get Math::BigFloat as part of the Math::BigInt distribution
-found on CPAN:
+NOTE:  If you are not running Perl 5.8.0, you must install at least 
+Math::BigFloat 1.27 before installing this module.  You can get Math::BigFloat
+as part of the Math::BigInt distribution found on CPAN:
 
 	http://search.cpan.org/search?mode=module&query=Math%3A%3ABigFloat
 
 
 John Peacock
-jpeacock@rowman.com
-
-$Revision$
+jpeacock@cpan.org

@@ -1,7 +1,9 @@
+Build.PL
 Changes
-Currency.pm
+lib/Math/Currency.pm
+LICENSE
 MANIFEST
-Makefile.PL
+META.yml
 README
-t/test.t
-META.yml                                 Module meta-data (added by MakeMaker)
+t/001_load.t
+t/002_basic.t

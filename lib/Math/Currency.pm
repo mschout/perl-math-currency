@@ -136,7 +136,7 @@ sub new		#05/10/99 3:13:PM
 	my $class  = ref($proto) || $proto;
 	my $parent = $proto if ref($proto);
 
-	my $value = shift;
+	my $value = shift || 0;
 
 	if ( (caller)[0] =~ /Math\::BigInt/ ) # only when called from objectify()
 	{
@@ -546,7 +546,7 @@ parameters:
 
 =head1 AUTHOR
 
-John Peacock <jpeacock@rowman.com>
+John Peacock <jpeacock@cpan.org>
 
 =head1 SEE ALSO
 
