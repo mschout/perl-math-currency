@@ -179,16 +179,38 @@ sub bstr		#05/10/99 3:52:PM
 {
 	my $self  = shift;
 	my $value = Math::BigFloat::bstr($self);
-	my $neg   = ($value =~ tr/-//d);
+	my $neg =  ($value =~ tr/-//d);
 	my $dp = index($value, ".");
+	my $myformat = $self->format();
+	my $sign = $neg		? $myformat->{NEGATIVE_SIGN}
+				: $myformat->{POSITIVE_SIGN} || '';
+	my $curr = $use_int 	? $myformat->{INT_CURR_SYMBOL}
+				: $myformat->{CURRENCY_SYMBOL};
+	my $formtab =
+	[
+	    [
+		['($value$curr)'   ,'($value $curr)'   ,'($value $curr)'   ],
+		['$sign$value$curr','$sign$value $curr','$sign$value $curr'],
+		['$value$curr$sign','$value $curr$sign','$value$curr $sign'],
+		['$value$sign$curr','$value $sign$curr','$value$sign $curr'],
+		['$value$curr$sign','$value $curr$sign','$value$curr $sign'],
+	    ],
+	    [
+		['($curr$value)'   ,'($curr $value)'    ,'($curr $value)'   ],
+		['$sign$curr$value','$sign$curr $value' ,'$sign $curr$value'],
+		['$curr$value$sign','$curr $value$sign' ,'$curr$value $sign'],
+		['$sign$curr$value', '$sign$curr $value','$sign $curr$value'],
+		['$curr$sign$value', '$curr$sign $value','$curr $sign$value'],
+	    ],
+	];
 
 	if ( $dp < 0 )
 	{
-		$value .= '.' . '0' x ${$self->format}{FRAC_DIGITS};
+		$value .= '.' . '0' x $myformat->{FRAC_DIGITS};
 	}
-	elsif ( (length($value) - $dp - 1) < ${$self->format}{FRAC_DIGITS} )
+	elsif ( (length($value) - $dp - 1) < $myformat->{FRAC_DIGITS} )
 	{
-		$value .= '0' x ( ${$self->format}{FRAC_DIGITS} - $dp )
+		$value .= '0' x ( $myformat->{FRAC_DIGITS} - $dp )
 	}
 
 	($value = reverse "$value") =~ s/\+//;
@@ -198,54 +220,20 @@ sub bstr		#05/10/99 3:52:PM
 	{
 		$value .= "0";
 	}
-	$value =~ s/\./${$self->format}{MON_DECIMAL_POINT}/;
-	$value =~ s/(\d{${$self->format}{MON_GROUPING}})(?=\d)(?!\d*\.)/$1${$self->format}{MON_THOUSANDS_SEP}/g;
+	$value =~ s/\./$myformat->{MON_DECIMAL_POINT}/;
+	$value =~ s/(\d{$myformat->{MON_GROUPING}})(?=\d)(?!\d*\.)/$1$myformat->{MON_THOUSANDS_SEP}/g;
 	$value = reverse $value;
 
-	if ( $neg )
-	{
-		if ( ${$self->format}{N_CS_PRECEDES} )
-		{
-			substr($value,0,0) = ($use_int ?
-				${$self->format}{INT_CURR_SYMBOL} :
-				${$self->format}{CURRENCY_SYMBOL});
-		}
-		else
-		{
-			$value .= $use_int ?
-				${$self->format}{INT_CURR_SYMBOL} :
-				${$self->format}{CURRENCY_SYMBOL};
+	eval '$value = "' .
+	    ( $neg
+		?   $formtab->	[$myformat->{N_CS_PRECEDES}]
+				[$myformat->{N_SIGN_POSN}]
+				[$myformat->{N_SEP_BY_SPACE}]
+		:   $formtab->	[$myformat->{P_CS_PRECEDES}]
+		    		[$myformat->{P_SIGN_POSN}]
+		    		[$myformat->{P_SEP_BY_SPACE}]
+	    ) . '"';
 
-		}
-		for ( ${$self->format}{N_SIGN_POSN})
-		{
-			/0/	and do { $value = '('.$self.')'; last; };
-			/[13]/	and do { substr($value, 0,0) = ${$self->format}{NEGATIVE_SIGN}; last; };
-			/[24]/	and do { $value .= ${$self->format}{NEGATIVE_SIGN}; last; };
-		}
-	}
-	else
-	{
-		if ( ${$self->format}{P_CS_PRECEDES} )
-		{
-			substr($value,0,0) = $use_int ?
-				${$self->format}{INT_CURR_SYMBOL} :
-				${$self->format}{CURRENCY_SYMBOL};
-		}
-		else
-		{
-			$value .= $use_int ?
-				${$self->format}{INT_CURR_SYMBOL} :
-				${$self->format}{CURRENCY_SYMBOL};
-
-		}
-		for ( ${$self->format}{P_SIGN_POSN} )
-		{
-			/0/	and do { $value = '('.$value.')'; last; };
-			/[13]/	and do { substr($value, 0,0) = ${$self->format}{POSITIVE_SIGN}; last; };
-			/[24]/	and do { $value .= ${$self->format}{POSITIVE_SIGN}; last; };
-		}
-	}
 	return $value;
 }	##stringify
 
