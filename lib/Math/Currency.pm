@@ -317,7 +317,7 @@ Math::Currency - Exact Currency Math with Formatting and Rounding
  $dollar = Math::Currency->new("$12,345.67");
  $taxamt = $dollar * 0.28;
  # this sets the default format for all objects w/o their own format
- Math::Currency->format( $LC_MONETARY->{EUR} );
+ Math::Currency->format('EUR');
  $euro = Money(12345.67);
  $euro_string = Money(12345.67)->bstr();
  # or if you already have a Math::Currency object
@@ -378,9 +378,12 @@ There are currently four predefined Locale formats:
     JPY = Japanese Yen (with extended ASCII currency character)
 
 These currency formats are implemented using subclasses for easy extension 
-(see scripts/new_currency to implement your own currency formatting).
-There are two different ways to specify which currency format you wish to
-use, with some subtle differences.
+(see L<Custom Locales> for details on creating new subclasses for
+unsupported locales).
+
+If you want to use any locale other than your default, there are two
+different ways to specify which currency format you wish to use, with
+somewhat subtle differences:
 
 =over 4
 
@@ -423,6 +426,36 @@ parameter is set:
     $Math::Currency::use_int = 1; # print the currency symbol text
 
 where the INT_CURR_SYMBOL text will used instead.
+
+=head2 Custom Locales
+
+The included scripts, new_currency, will automatically create a new
+currency formatting subclass, based on your current locale, or any
+arbitrary locale supported by your operating system.  For most unix-like
+O/S's, the following command will list the locale files installed:
+
+    locale -a
+
+and any of those installed locales can [potentially] be used to create a
+new locale formatting file.  It is not I<necessary> to do this, since using
+the L<format> command to switch to a locale which doesn't already have a
+subclass defined for it will attempt to generate a locale format on the
+fly.  However, if you are using this locale on a regular basis, it is
+faster to generate the subclass and install it (especially if you are using
+this module on a web server).
+
+To create a new locale formatting subclass, change to the top level build
+directory for Math::Currency and run the following command:
+
+    scripts/new_currency [xx_XX]
+
+where xx_XX is the locale name obtained from the `locale -a` command.  This
+will create a new locale subclass in the lib/Math/Currency/ directory, and
+this file will be installed when `./Build install` is next run.
+
+The new_currency script will function whether or not the current version of
+Math::Currency is installed, so you can build all of your commonly used
+locale files and install them at once.
 
 =head2 Global Format
 
