@@ -38,7 +38,8 @@ use POSIX qw(locale_h);
   Money
 );
 
-$VERSION = 0.38;    # switch to Subversion
+$VERSION = '0.40';    # switch to Subversion
+$VERSION = eval $VERSION; # if only I was using version.pm
 
 $PACKAGE = 'Math::Currency';
 
