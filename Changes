@@ -1,0 +1,25 @@
+Revision history for Perl extension Math::Currency.
+
+0.01  Mon May 10 15:11:36 1999
+	- original version; created by h2xs 1.18
+	- not publicly released
+0.02  Thu May 27 16:21:00 1999
+	- implement translucent print format
+0.03  Internal only release
+0.04  Tue Feb 29 12:04:00 2000
+	- make overridden format sticky
+0.05  Internal only release
+0.06  Mon Apr 24 03:45:00 2000
+	- Major Overhaul
+	- Inherit from Math::FixedPrecision
+0.07  Internal only release
+0.08  Tue Jun 27 11:32:06 2000
+	- Copy format from existing instance
+	- Implement cmp (I thought spaceship was enough)
+0.09  Tue Jun 27 14:45:09 2000
+	- Change multiply and divide to not promote term to currency type
+	- kick self repeatedly for being stupid
+0.10  7/28/2000 4:18PM
+	- Change everything, now inherits everything from Math::FixedPrecision
+0.11  2/21/2001 2:38PM
+	- Rewrite README to emphasis need for M::FP/M::BF/M::BI updates
