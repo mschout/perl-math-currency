@@ -93,6 +93,23 @@ $LC_MONETARY = {
 		P_SIGN_POSN 		=> '1',
 		N_SIGN_POSN 		=> '1',
 	      },
+	JPY => {
+		INT_CURR_SYMBOL 	=> 'JPY ',
+		CURRENCY_SYMBOL         => '¥',
+		MON_DECIMAL_POINT       => '.',
+		MON_THOUSANDS_SEP       => ',',
+		MON_GROUPING            => '3',
+		POSITIVE_SIGN           => '',
+		NEGATIVE_SIGN           => '-',
+		INT_FRAC_DIGITS         => '0',
+		FRAC_DIGITS             => '0',
+		P_CS_PRECEDES           => '1',
+		P_SEP_BY_SPACE          => '0',
+		N_CS_PRECEDES           => '1',
+		N_SEP_BY_SPACE          => '0',
+		P_SIGN_POSN             => '1',
+		N_SIGN_POSN             => '4',
+	      },
 };
 
 $FORMAT = {
@@ -242,6 +259,10 @@ sub bstr		#05/10/99 3:52:PM
 		    		[$myformat->{P_SIGN_POSN}]
 		    		[$myformat->{P_SEP_BY_SPACE}]
 	    ) . '"';
+
+	if ( substr($value,-1,1) eq '.' ) { # trailing bare decimal 
+	    chop($value);
+	}
 
 	return $value;
 }	##stringify
