@@ -12,332 +12,293 @@
 #   for commercial distribution without the prior approval of the author.
 #------------------------------------------------------------------------------
 eval 'exec /usr2/local/bin/perl -S $0 ${1+"$@"}'
-    if 0;
+  if 0;
 
 package Math::Currency;
 
 use strict;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $PACKAGE $FORMAT $LC_MONETARY
-	    $accuracy $precision $div_scale $round_mode $use_int $always_init);
+  $accuracy $precision $div_scale $round_mode $use_int $always_init);
 use Exporter;
-use Math::BigFloat 1.27;
-use overload	'""'	=>	\&bstr;
+use Math::BigFloat 1.47;
+use overload '""' => \&bstr;
 use POSIX qw(locale_h);
 
 @ISA = qw(Exporter Math::BigFloat);
+
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
-@EXPORT		= qw(
+@EXPORT = qw(
 );
 
-@EXPORT_OK	= qw(
-	$LC_MONETARY
-	$FORMAT
-	Money
+@EXPORT_OK = qw(
+  $LC_MONETARY
+  $FORMAT
+  Money
 );
 
-$VERSION = 0.38; # switch to Subversion
+$VERSION = 0.38;    # switch to Subversion
 
 $PACKAGE = 'Math::Currency';
 
 $LC_MONETARY = {
-	USD => {
-		INT_CURR_SYMBOL		=> 'USD ',
-		CURRENCY_SYMBOL		=> '$',
-		MON_DECIMAL_POINT	=> '.',
-		MON_THOUSANDS_SEP	=> ',',
-		MON_GROUPING		=> '3',
-		POSITIVE_SIGN		=> '',
-		NEGATIVE_SIGN		=> '-',
-		INT_FRAC_DIGITS		=> '2',
-		FRAC_DIGITS		=> '2',
-		P_CS_PRECEDES		=> '1',
-		P_SEP_BY_SPACE		=> '0',
-		N_CS_PRECEDES		=> '1',
-		N_SEP_BY_SPACE		=> '0',
-		P_SIGN_POSN		=> '1',
-		N_SIGN_POSN		=> '1',
-	      },
-	EUR=> {
-		INT_CURR_SYMBOL		=> 'EUR ',
-		CURRENCY_SYMBOL		=> '¤',
-		MON_DECIMAL_POINT	=> ',',
-		MON_THOUSANDS_SEP	=> ' ',
-		MON_GROUPING		=> '3',
-		POSITIVE_SIGN		=> '',
-		NEGATIVE_SIGN		=> '-',
-		INT_FRAC_DIGITS		=> '2',
-		FRAC_DIGITS		=> '2',
-		P_CS_PRECEDES		=> '1',
-		P_SEP_BY_SPACE		=> '0',
-		N_CS_PRECEDES		=> '1',
-		N_SEP_BY_SPACE		=> '0',
-		P_SIGN_POSN		=> '4',
-		N_SIGN_POSN		=> '4',
-	      },
-	GBP => {
-		INT_CURR_SYMBOL		=> 'GBP ',
-		CURRENCY_SYMBOL		=> '£',
-		MON_DECIMAL_POINT	=> '.',
-		MON_THOUSANDS_SEP	=> ',',
-		MON_GROUPING		=> '',
-		POSITIVE_SIGN 		=> '',
-		NEGATIVE_SIGN 		=> '-',
-		INT_FRAC_DIGITS 	=> '2',
-		FRAC_DIGITS 		=> '2',
-		P_CS_PRECEDES 		=> '1',
-		P_SEP_BY_SPACE 		=> '0',
-		N_CS_PRECEDES 		=> '1',
-		N_SEP_BY_SPACE 		=> '0',
-		P_SIGN_POSN 		=> '1',
-		N_SIGN_POSN 		=> '1',
-	      },
-	JPY => {
-		INT_CURR_SYMBOL 	=> 'JPY ',
-		CURRENCY_SYMBOL         => '¥',
-		MON_DECIMAL_POINT       => '.',
-		MON_THOUSANDS_SEP       => ',',
-		MON_GROUPING            => '3',
-		POSITIVE_SIGN           => '',
-		NEGATIVE_SIGN           => '-',
-		INT_FRAC_DIGITS         => '0',
-		FRAC_DIGITS             => '0',
-		P_CS_PRECEDES           => '1',
-		P_SEP_BY_SPACE          => '0',
-		N_CS_PRECEDES           => '1',
-		N_SEP_BY_SPACE          => '0',
-		P_SIGN_POSN             => '1',
-		N_SIGN_POSN             => '4',
-	      },
+    USD => {
+        INT_CURR_SYMBOL   => 'USD ',
+        CURRENCY_SYMBOL   => '$',
+        MON_DECIMAL_POINT => '.',
+        MON_THOUSANDS_SEP => ',',
+        MON_GROUPING      => '3',
+        POSITIVE_SIGN     => '',
+        NEGATIVE_SIGN     => '-',
+        INT_FRAC_DIGITS   => '2',
+        FRAC_DIGITS       => '2',
+        P_CS_PRECEDES     => '1',
+        P_SEP_BY_SPACE    => '0',
+        N_CS_PRECEDES     => '1',
+        N_SEP_BY_SPACE    => '0',
+        P_SIGN_POSN       => '1',
+        N_SIGN_POSN       => '1',
+    },
 };
 
-unless ( initialize() ) # no locale information available
+unless ( localize() )    # no locale information available
 {
-	$FORMAT = $LC_MONETARY->{USD};
+    $FORMAT = $LC_MONETARY->{USD};
 }
 
 # Set class constants
-$round_mode = 'even';  # Banker's rounding obviously
+$round_mode = 'even';      # Banker's rounding obviously
 $accuracy   = undef;
-$precision  = $FORMAT->{FRAC_DIGITS} > 0 ? -$FORMAT->{FRAC_DIGITS} : 0;
-$div_scale  = 40;
-$use_int    = 0;
-$always_init = 0;	# should the initialize() happen every time?
-
+$precision = $FORMAT->{FRAC_DIGITS} > 0 ? -$FORMAT->{FRAC_DIGITS} : 0;
+$div_scale = 40;
+$use_int   = 0;
+$always_init = 0;          # should the localize() happen every time?
 
 # Preloaded methods go here.
 ############################################################################
-sub new		#05/10/99 3:13:PM
+sub new                    #05/10/99 3:13:PM
 ############################################################################
 
 {
-	my $proto  = shift;
-	my $class  = ref($proto) || $proto;
-	my $parent = $proto if ref($proto);
+    my $proto  = shift;
+    my $class  = ref($proto) || $proto;
+    my $parent = $proto if ref($proto);
 
-	my $value = shift || 0;
+    my $value = shift || 0;
 
-	if ( (caller)[0] =~ /Math\::BigInt/ ) # only when called from objectify()
-	{
-		return Math::BigFloat->new($value);
-	}
+    if ( (caller)[0] =~ /Math\::BigInt/ )    # only when called from objectify()
+    {
+        return Math::BigFloat->new($value);
+    }
 
-	$value =~ tr/-()0-9.//cd;	#strip any formatting characters
-	$value = "-$value" if $value=~s/(^\()|(\)$)//g;	# handle parens
-	my $self;
-	my $format = shift;
-	if ( $format )
-	{
-		$self = Math::BigFloat->new($value,undef,
-			-$format->{FRAC_DIGITS});
-		bless $self, $class;
-		$self->format($format);
-	}
-	elsif ( $parent and defined $parent->{format} )	# if we are cloning an existing instance
-	{
-		$self = Math::BigFloat->new($value, undef,
-			-$parent->format->{FRAC_DIGITS});
-		bless $self, $class;
-		$self->format($parent->format);
-	}
-	else
-	{
-		$self = Math::BigFloat->new($value, undef,
-			-$FORMAT->{FRAC_DIGITS});
-		bless $self, $class;
-	}
-	return $self;
-}	##new
+    $value =~ tr/-()0-9.//cd;                #strip any formatting characters
+    $value = "-$value" if $value =~ s/(^\()|(\)$)//g;    # handle parens
+    my $self;
+    my $currency = shift;
+    my $format;
 
+    if ( not defined $currency and $class =~ /$PACKAGE\:\:([A-Z]{3})/ )
+    {
+	# must be one of our subclasses
+	$currency = $1;
+    }
 
-############################################################################
-sub Money		#05/10/99 4:16:PM
-############################################################################
+    if ( defined $currency )    #override default currency type
+    {
+        unless ( defined $LC_MONETARY->{$currency} ) {
+            eval "require Math::Currency::$currency";
+        }
+        $format = $LC_MONETARY->{$currency};
+    }
 
-{
-	return $PACKAGE->new(@_);
-}	##Money
-
-############################################################################
-sub bstr		#05/10/99 3:52:PM
-############################################################################
-
-{
-	my $self  = shift;
-	my $value = Math::BigFloat::bstr($self);
-	my $neg =  ($value =~ tr/-//d);
-	my $dp = index($value, ".");
-	my $myformat = $self->format();
-	my $sign = $neg		? $myformat->{NEGATIVE_SIGN}
-				: $myformat->{POSITIVE_SIGN};
-	my $curr = $use_int 	? $myformat->{INT_CURR_SYMBOL}
-				: $myformat->{CURRENCY_SYMBOL};
-	my $digits = $use_int 	? $myformat->{INT_FRAC_DIGITS}
-				: $myformat->{FRAC_DIGITS};
-	my $formtab =
-	[
-	    [
-		['($value$curr)'   ,'($value $curr)'   ,'($value $curr)'   ],
-		['$sign$value$curr','$sign$value $curr','$sign$value $curr'],
-		['$value$curr$sign','$value $curr$sign','$value$curr $sign'],
-		['$value$sign$curr','$value $sign$curr','$value$sign $curr'],
-		['$value$curr$sign','$value $curr$sign','$value$curr $sign'],
-	    ],
-	    [
-		['($curr$value)'   ,'($curr $value)'    ,'($curr $value)'   ],
-		['$sign$curr$value','$sign$curr $value' ,'$sign $curr$value'],
-		['$curr$value$sign','$curr $value$sign' ,'$curr$value $sign'],
-		['$sign$curr$value', '$sign$curr $value','$sign $curr$value'],
-		['$curr$sign$value', '$curr$sign $value','$curr $sign$value'],
-	    ],
-	];
-
-	if ( $dp < 0 )
-	{
-		$value .= '.' . '0' x $digits;
-	}
-	elsif ( (length($value) - $dp - 1) < $digits )
-	{
-		$value .= '0' x ( $digits - $dp )
-	}
-
-	($value = reverse "$value") =~ s/\+//;
-
-	# make sure there is a leading 0 for values < 1
-	if ( substr($value,-1,1) eq '.' )
-	{
-		$value .= "0";
-	}
-	$value =~ s/\./$myformat->{MON_DECIMAL_POINT}/;
-	$value =~ s/(\d{$myformat->{MON_GROUPING}})(?=\d)(?!\d*\.)/$1$myformat->{MON_THOUSANDS_SEP}/g;
-	$value = reverse $value;
-
-	eval '$value = "' .
-	    ( $neg
-		?   $formtab->	[$myformat->{N_CS_PRECEDES}]
-				[$myformat->{N_SIGN_POSN}]
-				[$myformat->{N_SEP_BY_SPACE}]
-		:   $formtab->	[$myformat->{P_CS_PRECEDES}]
-		    		[$myformat->{P_SIGN_POSN}]
-		    		[$myformat->{P_SEP_BY_SPACE}]
-	    ) . '"';
-
-	if ( substr($value,-1,1) eq '.' ) { # trailing bare decimal
-	    chop($value);
-	}
-
-	return $value;
-}	##stringify
+    if ($format) {
+        $self = Math::BigFloat->new( $value, undef, -$format->{FRAC_DIGITS} );
+        bless $self, $class;
+        $self->format($format);
+    }
+    elsif ( $parent
+        and defined $parent->{format} ) # if we are cloning an existing instance
+    {
+        $self =
+          Math::BigFloat->new( $value, undef, -$parent->format->{FRAC_DIGITS} );
+        bless $self, $class;
+        $self->format( $parent->format );
+    }
+    else {
+        $self = Math::BigFloat->new( $value, undef, -$FORMAT->{FRAC_DIGITS} );
+        bless $self, $class;
+    }
+    return $self;
+}    ##new
 
 ############################################################################
-sub format		#05/17/99 1:58:PM
+sub Money    #05/10/99 4:16:PM
 ############################################################################
 
 {
-	my $self = shift;
-	my $key = shift;	# do they want to display or set?
-	my $value = shift;      # did they supply a value?
-	initialize() if $always_init; # always reset the global format?
-	my $source = \$FORMAT;	# default format rules
-
-	if ( ref($self) )
-	{
-		if ( defined $self->{format} )
-		{
-			if ( defined $key and $key eq '' )
-			{
-				delete $self->{format};
-				$source = \$FORMAT;
-			}
-			else
-			{
-				$source = \$self->{format};
-			}
-		}
-		elsif ( defined $key ) 		# get/set a parameter
-		{
-			if (defined $value or ref($key) eq "HASH")	# have to copy global format
-			{
-				while (  my($k,$v) = each %{$FORMAT} )
-				{
-					$self->{format}{$k} = $v;
-				}
-				$source = \$self->{format};
-			}
-		}
-	}
-
-
-	if ( defined $key )	# otherwise just return
-	{
-		if ( ref($key) eq "HASH" )	# must be trying to replace all
-		{
-			$$source = $key;
-		}
-		else 				# get/set just one parameter
-		{
-			return $$source->{$key} unless defined $value;
-			$$source->{$key} = $value;
-		}
-	}
-	return $$source;
-}	##format
+    return $PACKAGE->new(@_);
+}            ##Money
 
 ############################################################################
-sub initialize #08/17/02 7:58:PM
+sub bstr     #05/10/99 3:52:PM
+############################################################################
+
+{
+    my $self     = shift;
+    my $value    = Math::BigFloat::bstr($self);
+    my $neg      = ( $value =~ tr/-//d );
+    my $dp       = index( $value, "." );
+    my $myformat = $self->format();
+    my $sign     = $neg
+      ? $myformat->{NEGATIVE_SIGN}
+      : $myformat->{POSITIVE_SIGN};
+    my $curr = $use_int
+      ? $myformat->{INT_CURR_SYMBOL}
+      : $myformat->{CURRENCY_SYMBOL};
+    my $digits = $use_int
+      ? $myformat->{INT_FRAC_DIGITS}
+      : $myformat->{FRAC_DIGITS};
+    my $formtab = [
+        [
+            [ '($value$curr)',    '($value $curr)',    '($value $curr)' ],
+            [ '$sign$value$curr', '$sign$value $curr', '$sign$value $curr' ],
+            [ '$value$curr$sign', '$value $curr$sign', '$value$curr $sign' ],
+            [ '$value$sign$curr', '$value $sign$curr', '$value$sign $curr' ],
+            [ '$value$curr$sign', '$value $curr$sign', '$value$curr $sign' ],
+        ],
+        [
+            [ '($curr$value)',    '($curr $value)',    '($curr $value)' ],
+            [ '$sign$curr$value', '$sign$curr $value', '$sign $curr$value' ],
+            [ '$curr$value$sign', '$curr $value$sign', '$curr$value $sign' ],
+            [ '$sign$curr$value', '$sign$curr $value', '$sign $curr$value' ],
+            [ '$curr$sign$value', '$curr$sign $value', '$curr $sign$value' ],
+        ],
+    ];
+
+    if ( $dp < 0 ) {
+        $value .= '.' . '0' x $digits;
+    }
+    elsif ( ( length($value) - $dp - 1 ) < $digits ) {
+        $value .= '0' x ( $digits - $dp );
+    }
+
+    ( $value = reverse "$value" ) =~ s/\+//;
+
+    # make sure there is a leading 0 for values < 1
+    if ( substr( $value, -1, 1 ) eq '.' ) {
+        $value .= "0";
+    }
+    $value =~ s/\./$myformat->{MON_DECIMAL_POINT}/;
+    $value =~
+s/(\d{$myformat->{MON_GROUPING}})(?=\d)(?!\d*\.)/$1$myformat->{MON_THOUSANDS_SEP}/g;
+    $value = reverse $value;
+
+    eval '$value = "'
+      . (
+          $neg
+        ? $formtab->[ $myformat->{N_CS_PRECEDES} ][ $myformat->{N_SIGN_POSN} ]
+          [ $myformat->{N_SEP_BY_SPACE} ]
+        : $formtab->[ $myformat->{P_CS_PRECEDES} ][ $myformat->{P_SIGN_POSN} ]
+          [ $myformat->{P_SEP_BY_SPACE} ]
+      )
+      . '"';
+
+    if ( substr( $value, -1, 1 ) eq '.' ) {    # trailing bare decimal
+        chop($value);
+    }
+
+    return $value;
+}    ##stringify
+
+############################################################################
+sub format    #05/17/99 1:58:PM
+############################################################################
+
+{
+    my $self  = shift;
+    my $key   = shift;    # do they want to display or set?
+    my $value = shift;    # did they supply a value?
+    localize() if $always_init;    # always reset the global format?
+    my $source = \$FORMAT;           # default format rules
+
+    if ( ref($self) ) {
+        if ( defined $self->{format} ) {
+            if ( defined $key and $key eq '' ) {
+                delete $self->{format};
+                $source = \$FORMAT;
+            }
+            else {
+                $source = \$self->{format};
+            }
+        }
+        elsif ( defined $key )       # get/set a parameter
+        {
+            if ( defined $value
+                or ref($key) eq "HASH" )    # have to copy global format
+            {
+                while ( my ( $k, $v ) = each %{$FORMAT} ) {
+                    $self->{format}{$k} = $v;
+                }
+                $source = \$self->{format};
+            }
+        }
+    }
+
+    if ( defined $key )                     # otherwise just return
+    {
+        if ( ref($key) eq "HASH" )          # must be trying to replace all
+        {
+            $$source = $key;
+        }
+        else                                # get/set just one parameter
+        {
+            return $$source->{$key} unless defined $value;
+            $$source->{$key} = $value;
+        }
+    }
+    return $$source;
+}    ##format
+
+############################################################################
+sub localize    #08/17/02 7:58:PM
 ############################################################################
 
 {
     my $self = shift;
+    my $format = shift || \$FORMAT;
 
     my $localeconv = POSIX::localeconv();
 
-    $FORMAT = {
-	INT_CURR_SYMBOL		=> $localeconv->{'int_curr_symbol'} 	|| '',
-	CURRENCY_SYMBOL		=> $localeconv->{'currency_symbol'} 	|| '',
-	MON_DECIMAL_POINT	=> $localeconv->{'mon_decimal_point'}	|| '',
-	MON_THOUSANDS_SEP	=> $localeconv->{'mon_thousands_sep'}	|| '',
-	MON_GROUPING		=>
-	    ( exists $localeconv->{'mon_grouping'} and
-		  defined $localeconv->{'mon_grouping'} and
-		  ord($localeconv->{'mon_grouping'}) < 47	?
-	    	ord($localeconv->{'mon_grouping'})	:
-		  $localeconv->{'mon_grouping'}
-	    ) ||  0,
-	POSITIVE_SIGN		=> $localeconv->{'positive_sign'} 	|| '',
-	NEGATIVE_SIGN		=> $localeconv->{'negative_sign'} 	|| '-',
-	INT_FRAC_DIGITS		=> $localeconv->{'int_frac_digits'} 	||  0,
-	FRAC_DIGITS		=> $localeconv->{'frac_digits'} 	||  0,
-	P_CS_PRECEDES		=> $localeconv->{'p_cs_precedes'}  	||  0,
-	P_SEP_BY_SPACE		=> $localeconv->{'p_sep_by_space'}  	||  0,
-	N_CS_PRECEDES		=> $localeconv->{'n_cs_precedes'}  	||  0,
-	N_SEP_BY_SPACE		=> $localeconv->{'n_sep_by_space'}  	||  0,
-	P_SIGN_POSN		=> $localeconv->{'p_sign_posn'}  	||  1,
-	N_SIGN_POSN		=> $localeconv->{'n_sign_posn'}  	||  0,
+    $$format = {
+        INT_CURR_SYMBOL   => $localeconv->{'int_curr_symbol'}   || '',
+        CURRENCY_SYMBOL   => $localeconv->{'currency_symbol'}   || '',
+        MON_DECIMAL_POINT => $localeconv->{'mon_decimal_point'} || '',
+        MON_THOUSANDS_SEP => $localeconv->{'mon_thousands_sep'} || '',
+        MON_GROUPING      => (
+            exists $localeconv->{'mon_grouping'}
+              and defined $localeconv->{'mon_grouping'}
+              and ord( $localeconv->{'mon_grouping'} ) < 47
+            ? ord( $localeconv->{'mon_grouping'} )
+            : $localeconv->{'mon_grouping'}
+          )
+          || 0,
+        POSITIVE_SIGN   => $localeconv->{'positive_sign'}   || '',
+        NEGATIVE_SIGN   => $localeconv->{'negative_sign'}   || '-',
+        INT_FRAC_DIGITS => $localeconv->{'int_frac_digits'} || 0,
+        FRAC_DIGITS     => $localeconv->{'frac_digits'}     || 0,
+        P_CS_PRECEDES   => $localeconv->{'p_cs_precedes'}   || 0,
+        P_SEP_BY_SPACE  => $localeconv->{'p_sep_by_space'}  || 0,
+        N_CS_PRECEDES   => $localeconv->{'n_cs_precedes'}   || 0,
+        N_SEP_BY_SPACE  => $localeconv->{'n_sep_by_space'}  || 0,
+        P_SIGN_POSN     => $localeconv->{'p_sign_posn'}     || 1,
+        N_SIGN_POSN     => $localeconv->{'n_sign_posn'}     || 0,
     };
 
-    return exists $localeconv->{'currency_symbol'} ? 1 : 0; # so you can test to see if locale was effective
+    return
+      exists $localeconv->{'currency_symbol'}
+      ? 1
+      : 0;    # so you can test to see if locale was effective
 }
 
 # Autoload methods go after =cut, and are processed by the autosplit program.
@@ -403,7 +364,51 @@ format can be changed to reflect local usage.  I used the suggestions in Tom
 Christiansen's L<PerlTootC|http://www.perl.com/language/misc/perltootc.html#Translucent_Attributes>
 to implement translucent attributes.  If you have set your locale values
 correctly, this module will pick up your local settings or US standards if you
-haven't.
+haven't.  You can also specify an output format using one of the predefined
+Locale formats or your own custom format.
+
+=head2 Predefined Locales
+
+There are currently four predefined Locale formats:
+
+    USD = United States dollars (the default if no locale)
+    EUR = One possible Euro format (no single standard, yet)
+    GBP = British Pounds Sterling
+    JPY = Japanese Yen (with extended ASCII currency character)
+
+These currency formats are implemented using subclasses for easy extension 
+(see scripts/new_currency to implement your own currency formatting).
+There are two different ways to specify which currency format you wish to
+use, with some subtle differences.
+
+=over 4
+
+=item * Additional parameter to new()
+
+If you need a single currency of a different type than the others in your
+program, use this mode:
+
+  use Math::Currency;
+  my $dollars = Math::Currency->new("1.23"); # default behavior
+  my $euros = Math::Currency->new("1.23", "EUR"); # different format
+
+The last line above will automatically load the applicable subclass and
+use that formatting for that specific object.
+
+=back
+
+=over 4
+
+=item * Directly calling the subclass
+
+If all (or most) of your currency values should be formatted using the same
+rules, create the objects directly using the subclass:
+
+  use Math::Currency::JPY; # Japanese Yen
+  my $yen = Math::Currency::JPY->new("1.345");
+  my $yen2 = $yen->new("3.456"); # you can use an existing object
+
+=back
 
 =head2 Currency Symbol
 
@@ -418,30 +423,12 @@ parameter is set:
 
 where the INT_CURR_SYMBOL text will used instead.
 
-=head2 Predefined Locales
-
-There are currently four predefined Locale LC_MONETARY formats:
-
-    USD = United States dollars (the default if no locale)
-    EUR = One possible Euro format (no single standard, yet)
-    GBP = British Pounds Sterling
-    JPY = Japanese Yen (with extended ASCII currency character)
-
-These hashes can be retrieved using the optional export $LC_MONETARY, like
-this:
-
-    $format = $LC_MONETARY->{EUR};
-
-This $format hash can be used to set either object formats (see L<"Object Formats">)
-or can be used to set the package format (see L<"Global Format">) that all
-objects will inherit by default.
-
 =head2 Global Format
 
 Global formatting can be changed by setting the package global format like
 this:
 
-    Math::Currency->format($LC_MONETARY->{USD});
+    Math::Currency->format('USD');
 
 =head2 POSIX Locale Global Formatting
 
@@ -452,7 +439,7 @@ at any time by using:
 
     use POSIX qw( locale_h );
     setlocale(LC_ALL,"en_GB");   # some locale alias
-    Math::Currency->initialize;  # reinitialize global format
+    Math::Currency->localize;    # reinitialize global format
 
 If you don't want to always have to remember to reinitialize the POSIX settings
 when you switch locales, you can set the global parameter:
@@ -479,9 +466,9 @@ the current locale settings.
 Any object can have it's own format different from the current global format,
 like this:
 
-    $pounds  = Math::Currency->new(1000, $LC_MONETARY->{GBP});
+    $pounds  = Math::Currency->new(1000, 'GBP');
     $dollars = Math::Currency->new(1000); # inherits default US format
-    $dollars->format( $LC_MONETARY->{USD} ); # explicit object format
+    $dollars->format( 'USD' ); # explicit object format
 
 =head2 Format Parameters
 
@@ -494,17 +481,20 @@ Locale settings.  For example, these are the values of the default US format
     MON_DECIMAL_POINT  => '.',    # Decimal seperator
     MON_THOUSANDS_SEP  => ',',    # Thousands seperator
     MON_GROUPING       => '3',    # Grouping digits
-    POSITIVE_SIGN      => '',     # Local positive sign (see below)
-    NEGATIVE_SIGN      => '-',    # Local negative sign (see below)
+    POSITIVE_SIGN      => '',     # Local positive sign
+    NEGATIVE_SIGN      => '-',    # Local negative sign
     INT_FRAC_DIGITS    => '2',    # Default Intl. precision
     FRAC_DIGITS        => '2',    # Local precision
     P_CS_PRECEDES      => '1',    # Currency symbol location
     P_SEP_BY_SPACE     => '0',    # Space between Currency and value
     N_CS_PRECEDES      => '1',    # Negative version of above
     N_SEP_BY_SPACE     => '0',    # Negative version of above
-    P_SIGN_POSN        => '1',    # Position of positive sign (see below)
-    N_SIGN_POSN        => '1',    # Position of negative sign (see below)
+    P_SIGN_POSN        => '1',    # Position of positive sign
+    N_SIGN_POSN        => '1',    # Position of negative sign
   }
+
+See chart below for how the various sign character and location settings
+interact.
 
 Each of the formatting parameters can be individually changed at the object
 or class (global) level; if an object is currently sharing the global format,

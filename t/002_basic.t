@@ -7,7 +7,7 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-use Test::More tests => 46;
+use Test::More tests => 45;
 use Math::Currency qw(Money $LC_MONETARY $FORMAT);
 use_ok( Math::Currency );
 
@@ -26,7 +26,7 @@ foreach $param qw( INT_CURR_SYMBOL CURRENCY_SYMBOL MON_DECIMAL_POINT
 }
 
 # For subsequent testing, we need to make sure that format is default US
-Math::Currency->format($LC_MONETARY->{USD});
+Math::Currency->format(USD);
 
 ok ( $dollars = Math::Currency->new('$18123'), "class new" );
 ok ( $dollars = $dollars->new('$18123'), "object new" );
@@ -69,15 +69,13 @@ ok ( $dollars eq 'WOW 20.01', "custom format maintained" );
 $dollars->format(''); # defined but false
 ok ( $dollars eq '$20.01', "default format restored" );
 
-$euros = Math::Currency->new( -29.95, $LC_MONETARY->{EUR});
+$euros = Math::Currency->new( -29.95, 'EUR');
 ok ( $euros eq '¤-29,95', "foreign currency" );
 $newdm = $euros->new(-29.95);
 ok ( $euros == $newdm, "two object equality (numeric)" );
 ok ( $euros eq $newdm, "two object equality (string)" );
 
-$pounds = Math::Currency->new( 98994.95);
-ok ( $pounds eq '$98,994.95', "maintains global format" );
-$pounds->format($LC_MONETARY->{GBP});
+$pounds = Math::Currency->new( 98994.95, 'GBP');
 ok ( $pounds eq '£98994.95', "changes to object format" );
 
 $newpounds = $pounds + 100000;
@@ -90,7 +88,7 @@ my $locale = setlocale(LC_ALL,"en_GB");
 
 SKIP: {
 	# NOTE: once Test::More::skip works, replace this with skip()
-	myskip ( "No locale support", 3) unless Math::Currency->initialize();
+	skip ("No locale support", 3) unless Math::Currency->localize();
 	pass ( "Re-initialized locale with en_GB" );
 	is ( $FORMAT->{INT_CURR_SYMBOL}, "GBP ", "POSIX format set properly");
 	$Math::Currency::always_init = 1;
@@ -102,18 +100,8 @@ print "# Formatting examples:\n";
 print "# In Pounds Sterling:	$pounds\n";
 print "# In negative Dollars:	$newdollars\n";
 
-$euros = Math::Currency->new( 23459.95, $LC_MONETARY->{EUR});
+$euros = Math::Currency->new( 23459.95, 'EUR');
 $Math::Currency::use_int = 1;
 
 print "# In Euros: 	$euros\n";
 
-# NOTE: once Test::More::skip works, remove this
-sub myskip {
-    my $why = shift;
-    my $n    = @_ ? shift : 1;
-    for (1..$n) {
-        pass ( "# Skip: $why");
-    }
-    local $^W = 0;
-    last SKIP;
-}
