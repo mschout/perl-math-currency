@@ -17,7 +17,7 @@ eval 'exec /usr2/local/bin/perl -S $0 ${1+"$@"}'
 package Math::Currency;
 
 use strict;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $PACKAGE $CURRFORMAT $LC_MONETARY
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $PACKAGE $FORMAT $LC_MONETARY
 	    $accuracy $precision $div_scale $round_mode $use_int);
 use Exporter;
 use Math::BigFloat 1.27;
@@ -34,7 +34,7 @@ use POSIX qw(locale_h);
 
 @EXPORT_OK	= qw(
 	$LC_MONETARY
-	$CURRFORMAT
+	$FORMAT
 	Money
 );
 
@@ -96,7 +96,7 @@ $LC_MONETARY = {
 	      },
 };
 
-$CURRFORMAT = {
+$FORMAT = {
 	INT_CURR_SYMBOL		=> ${localeconv()}{'int_curr_symbol'},
 	CURRENCY_SYMBOL		=> ${localeconv()}{'currency_symbol'},
 	MON_DECIMAL_POINT	=> ${localeconv()}{'mon_decimal_point'},
@@ -114,15 +114,15 @@ $CURRFORMAT = {
 	N_SIGN_POSN		=> ${localeconv()}{'n_sign_posn'},
 };
 
-unless ( defined $CURRFORMAT->{INT_CURR_SYMBOL} ) # no active locale
+unless ( defined $FORMAT->{INT_CURR_SYMBOL} ) # no active locale
 {
-	$CURRFORMAT = $LC_MONETARY->{USD};
+	$FORMAT = $LC_MONETARY->{USD};
 }
 
 # Set class constants
 $round_mode = 'even';  # Banker's rounding obviously
 $accuracy   = undef;
-$precision  = -$CURRFORMAT->{FRAC_DIGITS};
+$precision  = -$FORMAT->{FRAC_DIGITS};
 $div_scale  = 40;
 $use_int    = 0;
 
@@ -148,7 +148,7 @@ sub new		#05/10/99 3:13:PM
 		bless $self, $class;
 		$self->format($format);
 	}
-	elsif ( $parent and $parent->format )	# if we are cloning an existing instance
+	elsif ( $parent and defined $parent->{format} )	# if we are cloning an existing instance
 	{
 		$self = Math::BigFloat->new($value, undef,
 			-$parent->format->{FRAC_DIGITS});
@@ -176,12 +176,12 @@ sub _new		#07/28/00 4:50:PM
 	$value =~ tr/-0-9.//cd;	#strip any formatting characters
 	my $self;
 	my $dp = shift;
-	if ( $parent and $parent->format )	# if we are cloning an existing instance
+	if ( $parent and defined $parent->{format} )	# if we are cloning an existing instance
 	{
 		$self = Math::BigFloat->new($value,undef,
 			-$parent->format->{FRAC_DIGITS});
 		bless $self, $class;
-		$self->format($parent->format);
+		$self->format($parent->{format});
 	}
 	else
 	{
@@ -274,23 +274,24 @@ sub format		#05/17/99 1:58:PM
 
 {
 	my $self = shift;
-	my $class = ref($self ) || $self;
+	my $param = shift;
+	my $source = ref($self) && ( defined $self->{format} || defined $param ) ?
+		\$self->{format} : \$FORMAT;
 
-	unless ( ref $self )
+	if ( defined $param )	# otherwise just return
 	{
-		$CURRFORMAT = $_[0] if @_;
-		return $CURRFORMAT;
+		if ( ref($param) eq "HASH" )	# must be trying to replace all
+		{
+			$$source = $param;
+		}
+		else 				# replace just one parameter
+		{
+			my $value = shift;      # did they supply a value?
+			return $$source->{$param} unless defined $value;
+			$$source->{$param} = $value;
+		}
 	}
-
-	$self->{format} = $_[0] if @_;
-	if ( defined $self->{format} )
-	{
-		return $self->{format};
-	}
-	else
-	{
-		return $CURRFORMAT;
-	}
+	return $$source;
 }	##format
 
 # Autoload methods go after =cut, and are processed by the autosplit program.
