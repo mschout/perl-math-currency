@@ -112,10 +112,7 @@ $LC_MONETARY = {
 	      },
 };
 
-
-initialize();
-
-unless ( $FORMAT->{CURRENCY_SYMBOL} ) # no active locale
+unless ( initialize() ) # no locale information available
 {
 	$FORMAT = $LC_MONETARY->{USD};
 }
@@ -340,7 +337,7 @@ sub initialize #08/17/02 7:58:PM
 	N_SIGN_POSN		=> $localeconv->{'n_sign_posn'}  	||  0,
     };
 
-    return 1;
+    return exists $localeconv->{'currency_symbol'} ? 1 : 0; # so you can test to see if locale was effective
 }
 
 # Autoload methods go after =cut, and are processed by the autosplit program.
