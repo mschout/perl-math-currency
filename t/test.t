@@ -7,7 +7,7 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-use Test::More tests => 45;
+use Test::More tests => 46;
 use Math::Currency qw(Money $LC_MONETARY $FORMAT);
 use_ok( Math::Currency );
 
