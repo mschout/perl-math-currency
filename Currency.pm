@@ -21,8 +21,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $PACKAGE $FORMAT $LC_MONETARY
 	    $accuracy $precision $div_scale $round_mode $use_int);
 use Exporter;
 use Math::BigFloat 1.27;
-use overload	'""'	=>	\&bstr,
-	;
+use overload	'""'	=>	\&bstr;
 use POSIX qw(locale_h);
 
 @ISA = qw(Exporter Math::BigFloat);
@@ -38,7 +37,7 @@ use POSIX qw(locale_h);
 	Money
 );
 
-$VERSION = qw$Revision$[1]/10;
+$VERSION = (qw$Revision$)[1]/10;
 
 $PACKAGE = 'Math::Currency';
 
@@ -138,7 +137,8 @@ sub new		#05/10/99 3:13:PM
 	my $parent = $proto if ref($proto);
 
 	my $value = shift;
-	$value =~ tr/-0-9.//cd;	#strip any formatting characters
+	$value =~ tr/()-0-9.//cd;	#strip any formatting characters
+	$value = "-$value" if $value=~s/(^\()|(\)$)//g;	# handle parens
 	my $self;
 	my $format = shift;
 	if ( $format )
@@ -163,33 +163,6 @@ sub new		#05/10/99 3:13:PM
 	return $self;
 }	##new
 
-############################################################################
-sub _new		#07/28/00 4:50:PM
-############################################################################
-
-{
-	my $proto  = shift;
-	my $class  = ref($proto) || $proto;
-	my $parent = $proto if ref($proto);
-
-	my $value = shift;
-	$value =~ tr/-0-9.//cd;	#strip any formatting characters
-	my $self;
-	my $dp = shift;
-	if ( $parent and defined $parent->{format} )	# if we are cloning an existing instance
-	{
-		$self = Math::BigFloat->new($value,undef,
-			-$parent->format->{FRAC_DIGITS});
-		bless $self, $class;
-		$self->format($parent->{format});
-	}
-	else
-	{
-		$self = Math::BigFloat->new($value);
-		bless $self, $class;
-	}
-	return $self;
-}	##_new
 
 ############################################################################
 sub Money		#05/10/99 4:16:PM
@@ -207,9 +180,17 @@ sub bstr		#05/10/99 3:52:PM
 	my $self  = shift;
 	my $value = Math::BigFloat::bstr($self);
 	my $neg   = ($value =~ tr/-//d);
-	my $dp = length($value) - index($value, ".") - 1;
-	$value .= "0" x ( ${$self->format}{FRAC_DIGITS} - $dp )
-		if $dp < ${$self->format}{FRAC_DIGITS};
+	my $dp = index($value, ".");
+
+	if ( $dp < 0 )
+	{
+		$value .= '.' . '0' x ${$self->format}{FRAC_DIGITS};
+	}
+	elsif ( (length($value) - $dp - 1) < ${$self->format}{FRAC_DIGITS} )
+	{
+		$value .= '0' x ( ${$self->format}{FRAC_DIGITS} - $dp )
+	}
+
 	($value = reverse "$value") =~ s/\+//;
 
 	# make sure there is a leading 0 for values < 1
