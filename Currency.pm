@@ -112,7 +112,7 @@ $LC_MONETARY = {
 	      },
 };
 
-monetary_locale();
+initialize();
 
 unless ( $FORMAT->{CURRENCY_SYMBOL} ) # no active locale
 {
@@ -305,20 +305,14 @@ sub format		#05/17/99 1:58:PM
 }	##format
 
 ############################################################################
-sub monetary_locale		#08/17/02 7:58:PM
+sub initialize #08/17/02 7:58:PM
 ############################################################################
 
 {
     my $self = shift;
-    my $locale = shift;	
-    if ( defined $locale ) 
-    {
-	POSIX::setlocale (LC_MONETARY, $locale )
-	    or warn "Could not load locale $locale!\n";
-    }
 
     my $localeconv = POSIX::localeconv();
-
+    
     $FORMAT = {
 	INT_CURR_SYMBOL		=> $localeconv->{'int_curr_symbol'} 	|| '',
 	CURRENCY_SYMBOL		=> $localeconv->{'currency_symbol'} 	|| '',
@@ -341,7 +335,7 @@ sub monetary_locale		#08/17/02 7:58:PM
 	N_SIGN_POSN		=> $localeconv->{'n_sign_posn'}  	||  0,
     };
 
-    return POSIX::setlocale(LC_MONETARY);
+    return 1; 
 }
     
 # Autoload methods go after =cut, and are processed by the autosplit program.
@@ -432,7 +426,9 @@ the POSIX monetary format for a locale which you are not currently running
 (e.g. for a web site).  You can set the global monetary format in effect
 at any time by using:
 
-    Math::Currency->monetary_locale("ja_JP"); # some locale alias
+    use POSIX qw( locale_h );
+    setlocale(LC_ALL,"en_GB");   # some locale alias
+    Math::Currency->initialize;  # reinitialize global format
 
 NOTE: This function will reset only the global format and will not have
 effect on objects created with their own overridden formats.
@@ -440,7 +436,8 @@ effect on objects created with their own overridden formats.
 NOTE 2: You must have the locale files in question already loaded; the list
 reported by `locale -a` is not always a reliable judge of what files you
 might actually have installed.  If you try and set a nonexistant locale, 
-the module will emit a warning and retain the current locale settings.
+or set the same locale as is already active, the module will silently retain
+the current locale settings.
 
 =head2 Object Formats
 
