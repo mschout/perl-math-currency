@@ -274,21 +274,48 @@ sub format		#05/17/99 1:58:PM
 
 {
 	my $self = shift;
-	my $param = shift;
-	my $source = ref($self) && ( defined $self->{format} || defined $param ) ?
-		\$self->{format} : \$FORMAT;
+	my $key = shift;	# do they want to display or set?
+	my $value = shift;      # did they supply a value?
+	my $source = \$FORMAT;	# default format rules
 
-	if ( defined $param )	# otherwise just return
+	if ( ref($self) )
 	{
-		if ( ref($param) eq "HASH" )	# must be trying to replace all
+		if ( defined $self->{format} )
 		{
-			$$source = $param;
+			if ( defined $key and $key eq '' )
+			{
+				delete $self->{format};
+				$source = \$FORMAT;
+			}
+			else
+			{
+				$source = \$self->{format};
+			}
 		}
-		else 				# replace just one parameter
+		elsif ( defined $key ) 		# get/set a parameter
 		{
-			my $value = shift;      # did they supply a value?
-			return $$source->{$param} unless defined $value;
-			$$source->{$param} = $value;
+			if (defined $value or ref($key) eq "HASH")	# have to copy global format
+			{
+				while (  my($k,$v) = each %{$FORMAT} )
+				{
+					$self->{format}{$k} = $v;
+				}
+				$source = \$self->{format};
+			}
+		}
+	}
+
+
+	if ( defined $key )	# otherwise just return
+	{
+		if ( ref($key) eq "HASH" )	# must be trying to replace all
+		{
+			$$source = $key;
+		}
+		else 				# get/set just one parameter
+		{
+			return $$source->{$key} unless defined $value;
+			$$source->{$key} = $value;
 		}
 	}
 	return $$source;
