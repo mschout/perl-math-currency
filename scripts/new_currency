@@ -56,17 +56,19 @@ foreach my $param qw(
     $localesub .= "\t$param\t=>\t'$format->{$param}',\n";
 
 }
-$localesub .= "}\n\n1;\n";
+$localesub .= "};\n\n1;\n";
 
 my $filename = "lib/Math/Currency/$localename.pm";
 
 die "The $localename locale has already been generated" if -f $filename;
+print STDOUT "Outputting subclass for $localename\n";
 
 open LOCALE, ">", $filename
     or die "Cannot open the module output file: $filename";
 
 print LOCALE $localesub;
 close LOCALE;
+exit (0);
 
 sub usage {
     print STDOUT <<EOL;
@@ -91,5 +93,5 @@ USAGE:
     rerun `./Build install` and the additional files will be added to your
     local Perl installation.
 EOL
-    exit(0);
+    exit(1);
 }

@@ -87,7 +87,6 @@ use POSIX qw( locale_h );
 my $locale = setlocale(LC_ALL,"en_GB");
 
 SKIP: {
-	# NOTE: once Test::More::skip works, replace this with skip()
 	skip ("No locale support", 3) unless Math::Currency->localize();
 	pass ( "Re-initialized locale with en_GB" );
 	is ( $FORMAT->{INT_CURR_SYMBOL}, "GBP ", "POSIX format set properly");

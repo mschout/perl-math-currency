@@ -22,8 +22,8 @@ $LC_MONETARY->{EUR} = {
     P_SEP_BY_SPACE    => '0',
     N_CS_PRECEDES     => '1',
     N_SEP_BY_SPACE    => '0',
-    P_SIGN_POSN       => '4',
-    N_SIGN_POSN       => '4',
+    P_SIGN_POSN       => '1',
+    N_SIGN_POSN       => '1',
 };
 
 1;
