@@ -1,8 +1,0 @@
---- #YAML:1.0
-name: Math-Currency
-version: 0.38
-author:
-  - John Peacock <jpeacock@rowman.com>
-abstract: Exact Currency Math with Formatting and Rounding
-license: perl
-generated_by: Module::Build version 0.2607, without YAML.pm
