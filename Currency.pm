@@ -146,7 +146,7 @@ sub new		#05/10/99 3:13:PM
 		return Math::BigFloat->new($value);
 	}
 
-	$value =~ tr/()-0-9.//cd;	#strip any formatting characters
+	$value =~ tr/-()0-9.//cd;	#strip any formatting characters
 	$value = "-$value" if $value=~s/(^\()|(\)$)//g;	# handle parens
 	my $self;
 	my $format = shift;

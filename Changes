@@ -61,3 +61,5 @@ Revision history for Perl extension Math::Currency.
 0.36  08/26/2002 10:57am
 	- Add $always_init global parameter and test initialize() in format()
 	- Add POD discussion of quoting input
+0.37  08/26/2002 02:24pm
+	- Forgot to fix 5.8.0 tr// error
