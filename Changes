@@ -38,3 +38,8 @@ Revision history for Perl extension Math::Currency.
 0.25  2/05/2002 4:15PM
 	- Handle parentheses around negative currency
 	- Handle less than FRAC_DIGITS decimal places
+0.26  2/08/2002 4:45pm
+	- Completed support for locale formatting
+0.30  2/11/2002 11:45AM
+	- Completed rewrite of docs
+	- Increment version for release to CPAN

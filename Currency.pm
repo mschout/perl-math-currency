@@ -403,28 +403,42 @@ Locale settings.  For example, these are the values of the default US format
     N_SIGN_POSN        => '1',    # Position of negative sign (see below)
   }
 
+Each of the formatting parameters can be individually changed at the object
+or class (global) level; if an object is currently sharing the global format,
+all the global parameters will be copied prior to setting the overrided
+parameters.  For example:
+
+    $dollars = Math::Currency->new(1000); # inherits default US format
+    $dollars->format('CURRENCY_SYMBOL',' Bucks'); # now has its own format
+    $dollars->format('P_CS_PRECEDES',0); # now has its own format
+    print $dollars; # displays as "1000 Bucks"
+
+Or you can also set individual elements of the current global format:
+
+   Math::Currency->format('CURRENCY_SYMBOL',' Bucks'); # global changed
+
 The [NP]_SIGN_POSN parameter determines how positive and negative signs are
 displayed.  [NP]_CS_PRECEEDS determines where the currency symbol is shown.
 [NP]_SEP_BY_SPACE determines whether the currency symbol cuddles the value
 or not.  The following table shows the relationship between these three
-parameters (the negative variants are similar):
+parameters:
 
                                                p_sep_by_space
-                                          2          1         0
+                                         0          1          2
 
- p_cs_precedes = 1   p_sign_posn = 0   ($ 1.25)   ($ 1.25)   ($1.25)
-                     p_sign_posn = 1   + $1.25    +$ 1.25    +$1.25
-                     p_sign_posn = 2     $1.25 +   $ 1.25+    $1.25+
-                     p_sign_posn = 3   + $1.25    +$ 1.25    +$1.25
-                     p_sign_posn = 4   $ +1.25    $+ 1.25    $+1.25
+ p_cs_precedes = 0   p_sign_posn = 0    (1.25$)    (1.25 $)   (1.25 $)
+                     p_sign_posn = 1    +1.25$     +1.25 $    +1.25 $
+                     p_sign_posn = 2     1.25$+     1.25 $+    1.25$ +
+                     p_sign_posn = 3     1.25+$     1.25 +$    1.25+ $
+                     p_sign_posn = 4     1.25$+     1.25 $+    1.25$ +
 
- p_cs_precedes = 0   p_sign_posn = 0     (1.25 $)   (1.25 $)  (1.25$)
-                     p_sign_posn = 1     +1.25 $    +1.25 $   +1.25$
-                     p_sign_posn = 2      1.25$ +    1.25 $+   1.25$+
-                     p_sign_posn = 3      1.25+ $    1.25 +$   1.25+$
-                     p_sign_posn = 4      1.25$ +    1.25 $+   1.25$+
+ p_cs_precedes = 1   p_sign_posn = 0   ($1.25)   ($ 1.25)   ($ 1.25)
+                     p_sign_posn = 1   +$1.25    +$ 1.25    + $1.25
+                     p_sign_posn = 2    $1.25+    $ 1.25+     $1.25 +
+                     p_sign_posn = 3   +$1.25    +$ 1.25    + $1.25
+                     p_sign_posn = 4   $+1.25    $+ 1.25    $ +1.25
 
-
+(the negative variants are similar).
 
 
 =head1 AUTHOR
@@ -436,5 +450,6 @@ John Peacock <jpeacock@rowman.com>
 perl(1).
 perllocale
 Math::BigFloat
+Math::BigInt
 
 =cut
