@@ -322,9 +322,11 @@ sub initialize #08/17/02 7:58:PM
 	MON_DECIMAL_POINT	=> $localeconv->{'mon_decimal_point'}	|| '',
 	MON_THOUSANDS_SEP	=> $localeconv->{'mon_thousands_sep'}	|| '',
 	MON_GROUPING		=>
-	    ( ord($localeconv->{'mon_grouping'}) < 47	?
+	    ( exists $localeconv->{'mon_grouping'} and
+		  defined $localeconv->{'mon_grouping'} and
+		  ord($localeconv->{'mon_grouping'}) < 47	?
 	    	ord($localeconv->{'mon_grouping'})	:
-		$localeconv->{'mon_grouping'}
+		  $localeconv->{'mon_grouping'}
 	    ) ||  0,
 	POSITIVE_SIGN		=> $localeconv->{'positive_sign'} 	|| '',
 	NEGATIVE_SIGN		=> $localeconv->{'negative_sign'} 	|| '-',
