@@ -112,23 +112,7 @@ $LC_MONETARY = {
 	      },
 };
 
-$FORMAT = {
-	INT_CURR_SYMBOL		=> ${localeconv()}{'int_curr_symbol'} 	|| '',
-	CURRENCY_SYMBOL		=> ${localeconv()}{'currency_symbol'} 	|| '',
-	MON_DECIMAL_POINT	=> ${localeconv()}{'mon_decimal_point'}	|| '',
-	MON_THOUSANDS_SEP	=> ${localeconv()}{'mon_thousands_sep'}	|| '',
-	MON_GROUPING		=> ${localeconv()}{'mon_grouping'} 	||  0,
-	POSITIVE_SIGN		=> ${localeconv()}{'positive_sign'} 	|| '',
-	NEGATIVE_SIGN		=> ${localeconv()}{'negative_sign'} 	|| '-',
-	INT_FRAC_DIGITS		=> ${localeconv()}{'int_frac_digits'} 	||  0,
-	FRAC_DIGITS		=> ${localeconv()}{'frac_digits'} 	||  0,
-	P_CS_PRECEDES		=> ${localeconv()}{'p_cs_precedes'}  	||  0,
-	P_SEP_BY_SPACE		=> ${localeconv()}{'p_sep_by_space'}  	||  0,
-	N_CS_PRECEDES		=> ${localeconv()}{'n_cs_precedes'}  	||  0,
-	N_SEP_BY_SPACE		=> ${localeconv()}{'n_sep_by_space'}  	||  0,
-	P_SIGN_POSN		=> ${localeconv()}{'p_sign_posn'}  	||  1,
-	N_SIGN_POSN		=> ${localeconv()}{'n_sign_posn'}  	||  0,
-};
+monetary_locale();
 
 unless ( $FORMAT->{CURRENCY_SYMBOL} ) # no active locale
 {
@@ -320,6 +304,46 @@ sub format		#05/17/99 1:58:PM
 	return $$source;
 }	##format
 
+############################################################################
+sub monetary_locale		#08/17/02 7:58:PM
+############################################################################
+
+{
+    my $self = shift;
+    my $locale = shift;	
+    if ( defined $locale ) 
+    {
+	POSIX::setlocale (LC_MONETARY, $locale )
+	    or warn "Could not load locale $locale!\n";
+    }
+
+    my $localeconv = POSIX::localeconv();
+
+    $FORMAT = {
+	INT_CURR_SYMBOL		=> $localeconv->{'int_curr_symbol'} 	|| '',
+	CURRENCY_SYMBOL		=> $localeconv->{'currency_symbol'} 	|| '',
+	MON_DECIMAL_POINT	=> $localeconv->{'mon_decimal_point'}	|| '',
+	MON_THOUSANDS_SEP	=> $localeconv->{'mon_thousands_sep'}	|| '',
+	MON_GROUPING		=>
+	    ( ord($localeconv->{'mon_grouping'}) < 47	? 
+	    	ord($localeconv->{'mon_grouping'})	:
+		$localeconv->{'mon_grouping'}
+	    ) ||  0,
+	POSITIVE_SIGN		=> $localeconv->{'positive_sign'} 	|| '',
+	NEGATIVE_SIGN		=> $localeconv->{'negative_sign'} 	|| '-',
+	INT_FRAC_DIGITS		=> $localeconv->{'int_frac_digits'} 	||  0,
+	FRAC_DIGITS		=> $localeconv->{'frac_digits'} 	||  0,
+	P_CS_PRECEDES		=> $localeconv->{'p_cs_precedes'}  	||  0,
+	P_SEP_BY_SPACE		=> $localeconv->{'p_sep_by_space'}  	||  0,
+	N_CS_PRECEDES		=> $localeconv->{'n_cs_precedes'}  	||  0,
+	N_SEP_BY_SPACE		=> $localeconv->{'n_sep_by_space'}  	||  0,
+	P_SIGN_POSN		=> $localeconv->{'p_sign_posn'}  	||  1,
+	N_SIGN_POSN		=> $localeconv->{'n_sign_posn'}  	||  0,
+    };
+
+    return POSIX::setlocale(LC_MONETARY);
+}
+    
 # Autoload methods go after =cut, and are processed by the autosplit program.
 
 1;
@@ -383,6 +407,7 @@ There are currently three predefined Locale LC_MONETARY formats:
     USD = United States dollars (the default if no locale)
     EUR = One possible Euro format (no single standard, yet)
     GBP = British Pounds Sterling
+    JPY = Japanese Yen (with extended ASCII currency character)
 
 These hashes can be retrieved using the optional export $LC_MONETARY, like
 this:
@@ -400,6 +425,23 @@ this:
 
     Math::Currency->format($LC_MONETARY->{USD});
 
+=head2 POSIX locale formatting
+
+In addition to the four predefined formats listed above, you can also use
+the POSIX monetary format for a locale which you are not currently running
+(e.g. for a web site).  You can set the global monetary format in effect
+at any time by using:
+
+    Math::Currency->monetary_locale("ja_JP"); # some locale alias
+
+NOTE: This function will reset only the global format and will not have
+effect on objects created with their own overridden formats.
+
+NOTE 2: You must have the locale files in question already loaded; the list
+reported by `locale -a` is not always a reliable judge of what files you
+might actually have installed.  If you try and set a nonexistant locale, 
+the module will emit a warning and retain the current locale settings.
+
 =head2 Object Formats
 
 Any object can have it's own format different from the current global format,
@@ -414,7 +456,6 @@ like this:
 The format must contains all of the commonly configured LC_MONETARY
 Locale settings.  For example, these are the values of the default US format
 (with comments):
-
   {
     INT_CURR_SYMBOL    => 'USD',  # ISO currency text
     CURRENCY_SYMBOL    => '$',    # Local currency character
@@ -477,9 +518,9 @@ John Peacock <jpeacock@rowman.com>
 
 =head1 SEE ALSO
 
-perl(1).
-perllocale
-Math::BigFloat
-Math::BigInt
+ perl(1).
+ perllocale
+ Math::BigFloat
+ Math::BigInt
 
 =cut
