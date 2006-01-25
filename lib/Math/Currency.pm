@@ -316,7 +316,10 @@ sub localize    #08/17/02 7:58:PM
     my $self   = shift;
     my $format = shift || \$FORMAT;
 
-    my $localeconv = POSIX::localeconv();
+    my $localeconv = POSIX::localeconv(); 
+
+    # so you can test to see if locale was effective
+    return 0 if ! exists $localeconv->{'currency_symbol'};
 
     $$format = {
         INT_CURR_SYMBOL   => $localeconv->{'int_curr_symbol'}   || '',
@@ -343,9 +346,7 @@ sub localize    #08/17/02 7:58:PM
         N_SIGN_POSN     => $localeconv->{'n_sign_posn'}     || 0,
     };
 
-    return exists $localeconv->{'currency_symbol'}
-      ? 1
-      : 0;    # so you can test to see if locale was effective
+    return 1;
 }
 
 ############################################################################
@@ -418,7 +419,7 @@ inaccurate results, if rounding is performed at each intermediate step.
 In order to preserve appropriate accuracy, the Math::Currency values are
 stored with an additional two places of accuracy internally and only
 rounded to the "correct" precision when the value is displayed (either by
-the default stringification or through the use of L<as_float> or L<as_int).
+the default stringification or through the use of L<as_float> or L<as_int>).
 
 All common mathematical operations are overloaded, so once you initialize a
 currency variable, you can treat it like any number and the module will do
