@@ -119,12 +119,12 @@ sub run_tests {
 	    skip ("No locale support", 3) unless $CLASS->localize();
 	    pass ( "Re-initialized locale with en_GB" );
 	    is ( $FORMAT->{INT_CURR_SYMBOL}, "GBP ", "POSIX format set properly");
-	    $CLASS->always_init(1);
 	    $locale = setlocale(LC_ALL,"en_US");
-	    $CLASS->always_init(0);
-	    skip ("No en_US installed", 1) 
-		unless $FORMAT->{INT_CURR_SYMBOL} eq 'USD';
+	    skip ("No en_US locale installed", 1) 
+	    	unless setlocale(LC_ALL) eq "en_US";
+	    $CLASS->always_init(1);
 	    is ( $dollars, '$20.01', "POSIX format reset properly");
+	    $CLASS->always_init(0);
     }
 
 # new features suggested by Cory Watson <cwatson@magazines.com>
