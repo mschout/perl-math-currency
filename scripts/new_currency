@@ -28,8 +28,8 @@ my $format = {};
 die "Cannot determine your locale currency format"
     unless Math::Currency->localize( \$format );
 
-my $localename = $format->{INT_CURR_SYMBOL};
-$localename =~ s/([A-Z]{3})./$1/;
+#my ($localename,$utf8) = split(/\./,$lang);
+my $localename = $lang;
 my $localesub = <<EOL;
 #!/usr/bin/perl -w
 package Math::Currency::$localename;
@@ -40,6 +40,13 @@ use vars qw(\$VERSION \@ISA \$LANG);
 
 \$VERSION = $Math::Currency::VERSION;
 \$LANG  = '$lang';
+EOL
+
+if ($localename =~ /UTF-8/i) {
+    $localesub .= "use utf8;\n";
+}
+
+$localesub .= <<EOL;
 \@ISA     = qw(Exporter Math::Currency);
 
 \$LC_MONETARY->{$localename} = {
@@ -61,7 +68,7 @@ foreach my $param qw(
 }
 $localesub .= "};\n\n1;\n";
 
-my $filename = "lib/Math/Currency/$localename.pm";
+(my $filename = "lib/Math/Currency/$localename.pm") =~ s/\.UTF-8/_UTF-8/;
 
 die "The $localename locale has already been generated" 
   if not $opt_f and -f $filename;

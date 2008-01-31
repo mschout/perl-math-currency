@@ -38,12 +38,12 @@ use POSIX qw(locale_h);
   Money
 );
 
-$VERSION = 0.46;
+$VERSION = 0.47;
 
 $PACKAGE = __PACKAGE__;
 
 $LC_MONETARY = {
-    USD => {
+    en_US => {
         INT_CURR_SYMBOL   => 'USD ',
         CURRENCY_SYMBOL   => '$',
         MON_DECIMAL_POINT => '.',
@@ -60,11 +60,12 @@ $LC_MONETARY = {
         P_SIGN_POSN       => '1',
         N_SIGN_POSN       => '1',
     },
+    USD => $LC_MONETARY->{en_US},
 };
 
 unless ( localize() )    # no locale information available
 {
-    $FORMAT = $LC_MONETARY->{USD};
+    $FORMAT = $LC_MONETARY->{en_US};
 }
 
 # Set class constants
@@ -99,10 +100,10 @@ sub new                  #05/10/99 3:13:PM
     my $currency = shift;
     my $format;
 
-    if ( not defined $currency and $class =~ /$PACKAGE\:\:([A-Z]{3})/ ) {
+    if ( not defined $currency and $class->isa($PACKAGE) ) {
 
         # must be one of our subclasses
-        $currency = $1;
+        $currency = $1 if ($class =~ /$PACKAGE\:\:(\w+)/);
     }
 
     if ( defined $currency )    #override default currency type
@@ -368,11 +369,11 @@ sub unknown_currency    #02/03/05 4:37am
 {
     my ($currency) = @_;
     open LOCALES, "locale -a |";
-    while (<LOCALES>) {
-        chomp;
-        setlocale( LC_ALL, $_ );
+    while (my $LOCALE = <LOCALES>) {
+        chomp($LOCALE);
+        setlocale( LC_ALL, $LOCALE );
         my $localeconv = POSIX::localeconv();
-        if ( defined $localeconv->{'int_curr_symbol'}
+	if ( $LOCALE eq $currency || defined $localeconv->{'int_curr_symbol'}
             and $localeconv->{'int_curr_symbol'} =~ /$currency/ )
         {
             my $format = \$LC_MONETARY->{$currency};
