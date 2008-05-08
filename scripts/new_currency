@@ -28,8 +28,7 @@ my $format = {};
 die "Cannot determine your locale currency format"
     unless Math::Currency->localize( \$format );
 
-#my ($localename,$utf8) = split(/\./,$lang);
-my $localename = $lang;
+my ($localename,$utf8) = split(/\./,$lang);
 my $localesub = <<EOL;
 #!/usr/bin/perl -w
 package Math::Currency::$localename;
@@ -42,7 +41,7 @@ use vars qw(\$VERSION \@ISA \$LANG);
 \$LANG  = '$lang';
 EOL
 
-if ($localename =~ /UTF-8/i) {
+if (defined $utf8 and $utf8 =~ /UTF-?8/i) {
     $localesub .= "use utf8;\n";
 }
 
@@ -66,9 +65,20 @@ foreach my $param qw(
     $localesub .= "\t$param\t=>\t'$format->{$param}',\n";
 
 }
-$localesub .= "};\n\n1;\n";
+$localesub .= "};\n\n"; # finish off the base locale module
 
-(my $filename = "lib/Math/Currency/$localename.pm") =~ s/\.UTF-8/_UTF-8/;
+# now generate a compatibility class for the symbolic name
+
+(my $symbol_locale = $format->{INT_CURR_SYMBOL}) =~ s/ //g; #trailing spaces
+$localesub .= <<"EOL";
+package Math::Currency::$symbol_locale;
+use base "Math::Currency::$localename";
+\$LC_MONETARY->{$symbol_locale} = \\\$LC_MONETARY->{$localename};
+
+1;
+EOL
+
+my $filename = "lib/Math/Currency/$localename.pm";
 
 die "The $localename locale has already been generated" 
   if not $opt_f and -f $filename;

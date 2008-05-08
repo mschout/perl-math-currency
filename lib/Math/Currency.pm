@@ -4,7 +4,7 @@
 # PURPOSE:	Perform currency calculations without floating point
 #
 #------------------------------------------------------------------------------
-#   Copyright (c) 2001-2005 John Peacock
+#   Copyright (c) 2001-2008 John Peacock
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file,
@@ -20,7 +20,7 @@ use strict;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $PACKAGE $FORMAT $LC_MONETARY
   $accuracy $precision $div_scale $round_mode $use_int $always_init);
 use Exporter;
-use Math::BigFloat 1.47;
+use Math::BigFloat 1.60;
 use overload '""' => \&bstr;
 use POSIX qw(locale_h);
 
@@ -368,13 +368,15 @@ sub unknown_currency    #02/03/05 4:37am
 
 {
     my ($currency) = @_;
-    open LOCALES, "locale -a |";
+    open LOCALES, "|-", "locale -a";
     while (my $LOCALE = <LOCALES>) {
         chomp($LOCALE);
         setlocale( LC_ALL, $LOCALE );
         my $localeconv = POSIX::localeconv();
-	if ( $LOCALE eq $currency || defined $localeconv->{'int_curr_symbol'}
-            and $localeconv->{'int_curr_symbol'} =~ /$currency/ )
+	if ( $LOCALE eq $currency || 
+	    (defined $localeconv->{'int_curr_symbol'}
+             and $localeconv->{'int_curr_symbol'} =~ /$currency/ )
+	   )
         {
             my $format = \$LC_MONETARY->{$currency};
             Math::Currency->localize($format);
@@ -471,23 +473,52 @@ correctly, this module will pick up your local settings or US standards if you
 haven't.  You can also specify an output format using one of the predefined
 Locale formats or your own custom format.
 
+=head2 Locale Support
+
+This module uses the builtin locale support provided by your operating system
+to generate the appropriate currency formatting.  Much of this support will
+happen automagically if you have your LANG environment setting correct.  If you
+chose not to install multiple locales when you installed your operating system,
+you will only be able to use your default locale format or one of the
+L<Predefined Locales> included in the distribution.
+
+The automatic locale support will take effect if you request a locale by name
+in the for lc_CC (language/country code) like fr_CA (French Canadian) or 
+en_NZ (English New Zealand).  If you pregenerate your L<Custom Locale>, an 
+alias class will be added so that you can refer to the currency by either
+the locale name or the INT_CURR_SYMBOL (e.g. USD or GBP).
+
+B<IMPORTANT NOTE>: there are multiple locales which implement the EUR (Euro)
+currency, each with slightly different formatting rules (aren't standards
+wonderful).  If you C<use> multiple currencies that represent EUR, the last
+one loaded will be available as the INT_CURR_SYMBOL shortcut.  You should
+always use the locale name to refer to these currencies, if you are mixing
+them in a single program.
+
 =head2 Predefined Locales
 
 There are currently four predefined Locale formats:
 
-    USD = United States dollars (the default if no locale)
-    EUR = One possible Euro format (no single standard, yet)
-    GBP = British Pounds Sterling
-    JPY = Japanese Yen (with extended ASCII currency character)
+    en_US = United States dollars (the default if no locale)
+    en_GB = British Pounds Sterling
+    ja_JP = Japanese Yen 
+    de_DE = German Euro
 
 These currency formats are implemented using subclasses for easy extension 
 (see L<Custom Locales> for details on creating new subclasses for
-unsupported locales).  In particular, you may want to delete and recreate
-the EUR subclass, since the EUR "standard" permits the use of decimal and 
-grouping seperators (commas and periods) that vary by country.
+unsupported locales).  If you are using a locale in a country that uses the
+Euro, you should create your own local format file using your default LANG 
+setting, since the Euro formatting rules are country specific.
 
-If you want to use any locale other than your default, there are two
-different ways to specify which currency format you wish to use, with
+B<IMPORTANT NOTE>: the predefined locales have been generated using non-UTF-8
+locales (since all of the above currencies have a native ASCII character
+available).  If you use a UTF-8 locale (common with more modern Linux distros),
+then the non-UTF-8 version will be used if found.  Some locales require the
+use of UTF-8 to represent their L<local currency|Currency Symbol>, so you must
+generate your own L<Custom Locale> to fully support that usage.
+
+If you want to use any locale other than your default in a single script, there
+are two different ways to specify which currency format you wish to use, with
 somewhat subtle differences:
 
 =over 4
@@ -499,12 +530,12 @@ program, use this mode:
 
   use Math::Currency;
   my $dollars = Math::Currency->new("1.23"); # default behavior
-  my $euros = Math::Currency->new("1.23", "EUR"); # different format
+  my $euros = Math::Currency->new("1.23", "de_DE"); # different format
 
 The last line above will automatically load the applicable subclass and
 use that formatting for that specific object.  These formats can either use
 a pre-generated subclass or will automatically generate an automatic
-L<custom subclass>.
+L<Custom Locale>, 
 
 =back
 
@@ -515,8 +546,8 @@ L<custom subclass>.
 If all (or most) of your currency values should be formatted using the same
 rules, create the objects directly using the subclass:
 
-  use Math::Currency::JPY; # Japanese Yen
-  my $yen = Math::Currency::JPY->new("1.345");
+  use Math::Currency::ja_JP; # Japanese Yen
+  my $yen = Math::Currency::JPY->new("1.345"); # compatibility class
   my $yen2 = $yen->new("3.456"); # you can use an existing object
 
 =back
@@ -534,7 +565,7 @@ parameter is set:
 
 where the INT_CURR_SYMBOL text will used instead.
 
-=head2 Custom Subclass
+=head2 Custom Locales 
 
 The included file, scripts/new_currency, will automatically create a new
 currency formatting subclass, based on your current locale, or any
@@ -550,7 +581,7 @@ It is not I<necessary> to do this, since using the L<format> command to
 switch to a locale which doesn't already have a subclass defined for it
 will attempt to generate a locale format on the fly.  However, it should be
 noted that the automated generation method will merely look for the first
-locales that uses the request INT_CURR_SYMBOL.  There may be several locales
+locales that uses the requested INT_CURR_SYMBOL.  There may be several locales
 which use that same currency symbol, with subtle differences (this is
 especially true of the EUR format), so it is best to pre-generate all
 of the POSIX currency subclasses you expect, based on the locales you wish
@@ -565,6 +596,12 @@ directory for Math::Currency and run the following command:
 where xx_XX is the locale name obtained from the `locale -a` command.  This
 will create a new locale subclass in the lib/Math/Currency/ directory, and
 this file will be installed when `./Build install` is next run.
+
+If you run the script without any commandline option, it will take the contents
+of your LANG environment variable and generate your default locale.  NOTE that
+if you are using a UTF-8 locale, the generated file will also be UTF-8 (which
+may not be what you want).  You probably always want to specify the locale
+name when generating new classes.
 
 The new_currency script will function from within the current build
 directory, and doesn't depend the current version of Math::Currency 

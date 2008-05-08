@@ -1,14 +1,14 @@
 use Test::More tests => 7;
 
-BEGIN { use_ok( Math::Currency::JPY ); }
+BEGIN { use_ok( Math::Currency::ja_JP ); }
 
 # For subsequent testing, we need to make sure that format is default US
 Math::Currency->format('USD');
 
-my $object = Math::Currency::JPY->new("102");
+my $object = Math::Currency::ja_JP->new("102");
 
 isa_ok ($object, 'Math::Currency');
-isa_ok ($object, 'Math::Currency::JPY');
+isa_ok ($object, 'Math::Currency::ja_JP');
 is ( $object, 'бя102', 'Extended ASCII currency marker');
 $Math::Currency::use_int = 1;
 is ( $object, 'JPY 102', 'ISO currency marker');
