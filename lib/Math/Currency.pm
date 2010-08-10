@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+# vim:ts=4:sw=4:et:at:
 #
 # PROGRAM:	Math::Currency.pm	# - 04/26/00 9:10:AM
 # PURPOSE:	Perform currency calculations without floating point
@@ -60,8 +61,8 @@ $LC_MONETARY = {
         P_SIGN_POSN       => '1',
         N_SIGN_POSN       => '1',
     },
-    USD => $LC_MONETARY->{en_US},
 };
+$LC_MONETARY->{USD} = $LC_MONETARY->{en_US};
 
 unless ( localize() )    # no locale information available
 {
@@ -368,7 +369,8 @@ sub unknown_currency    #02/03/05 4:37am
 
 {
     my ($currency) = @_;
-    open LOCALES, "|-", "locale -a";
+    $DB::single=1;
+    open LOCALES, "-|", "locale -a";
     while (my $LOCALE = <LOCALES>) {
         chomp($LOCALE);
         setlocale( LC_ALL, $LOCALE );
@@ -380,6 +382,25 @@ sub unknown_currency    #02/03/05 4:37am
         {
             my $format = \$LC_MONETARY->{$currency};
             Math::Currency->localize($format);
+	    (my $int_curr = $$format->{'INT_CURR_SYMBOL'}) =~  s/ //g;
+	    $LC_MONETARY->{$int_curr} = $LC_MONETARY->{$currency}
+		unless exists $LC_MONETARY->{$int_curr};	
+	    eval <<"EOP";
+package Math::Currency::${LOCALE};
+use vars qw(\$VERSION \@ISA \$LANG);
+
+\$VERSION = $Math::Currency::VERSION;
+\$LANG  = '$LOCALE';
+\@ISA = qw/Math::Currency/;
+1;
+package Math::Currency::${int_curr};
+use vars qw(\$VERSION \@ISA \$LANG);
+
+\$VERSION = $Math::Currency::VERSION;
+\$LANG  = '$LOCALE';
+\@ISA = qw/Math::Currency/;
+1;
+EOP
             last;
         }
     }
