@@ -5,13 +5,13 @@ use Exporter;
 use Math::Currency qw($LC_MONETARY $FORMAT);
 use vars qw($VERSION @ISA $LANG);
 
-$VERSION = 0.47;
+$VERSION = 0.48;
 $LANG  = 'ja_JP';
 @ISA     = qw(Exporter Math::Currency);
 
 $LC_MONETARY->{ja_JP} = {
 	INT_CURR_SYMBOL	=>	'JPY ',
-	CURRENCY_SYMBOL	=>	'бя',
+	CURRENCY_SYMBOL	=>	'┬е ',
 	MON_DECIMAL_POINT	=>	'.',
 	MON_THOUSANDS_SEP	=>	',',
 	MON_GROUPING	=>	'3',
@@ -29,6 +29,7 @@ $LC_MONETARY->{ja_JP} = {
 
 package Math::Currency::JPY;
 use base "Math::Currency::ja_JP";
+$VERSION = $Math::Currency::ja_JP::VERSION;
 $LC_MONETARY->{JPY} = \$LC_MONETARY->{ja_JP};
 
 1;

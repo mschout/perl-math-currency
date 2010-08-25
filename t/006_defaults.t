@@ -13,5 +13,5 @@ is ( $dollars, '$12.34', 'Individual currency object');
 $format = Math::Currency->format("GBP"); #change default currency
 ok ( $format->{INT_CURR_SYMBOL} =~ /GBP/, 'Default currency changed');
 
-is ( $dollars, '$12.34', 'Object did not chang to new default currency');
+is ( $dollars, '$12.34', 'Object did not change to new default currency');
 isnt ( $floating, '$12.34', 'Object changed to new default currency');

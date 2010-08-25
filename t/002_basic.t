@@ -99,34 +99,6 @@ sub run_tests {
     is ( $dollars, '$20.01', "default format restored" );
 
 
-# monetary_locale testing
-    use POSIX qw( locale_h );
-    my $locale;
-
-    SKIP: {
-	    $locale = setlocale(LC_ALL,"en_GB");
-	    skip ("No en_GB locale installed", 1)
-	    	unless setlocale(LC_ALL) eq "en_GB";
-	    skip ("No locale support", 3) unless $CLASS->localize();
-	    pass ( "Re-initialized locale with en_GB" );
-	    is ( $FORMAT->{INT_CURR_SYMBOL}, "GBP ", "POSIX format set properly");
-
-	    $pounds = $CLASS->new( 98994.95, 'GBP');
-	    is ( $pounds, '£98,994.95', "changes to object format" );
-	    $newpounds = $pounds + 100000;
-
-	    is ( ref($newpounds), ref($pounds), "autoupgrade to object" );
-	}
-
-    SKIP: {
-	    $locale = setlocale(LC_ALL,"en_US");
-	    skip ("No en_US locale installed", 1)
-	    	unless setlocale(LC_ALL) eq "en_US";
-	    $CLASS->always_init(1);
-	    is ( $dollars, '$20.01', "POSIX format reset properly");
-	    $CLASS->always_init(0);
-    }
-
 # new features suggested by Cory Watson <cwatson@magazines.com>
     is ($dollars->as_float, "20.01", 'display without formatting');
     is ($dollars->as_int, "2001", 'display integer number of minimum units');

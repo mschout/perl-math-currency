@@ -89,6 +89,9 @@ sub new                  #05/10/99 3:13:PM
 
     my $value = shift || 0;
 
+    if (eval("'1.01' ne 1.01")) { # this might be a comma locale
+	$value =~ tr/,/./;
+    }
     $value =~ tr/-()0-9.//cd;    #strip any formatting characters
     $value = "-$value" if $value =~ s/(^\()|(\)$)//g;    # handle parens
 
