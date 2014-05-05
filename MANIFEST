@@ -7,6 +7,7 @@ lib/Math/Currency/ja_JP.pm
 LICENSE
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
 META.yml
 README
 scripts/new_currency
