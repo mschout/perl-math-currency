@@ -5,7 +5,7 @@ use Exporter;
 use Math::Currency qw($LC_MONETARY $FORMAT);
 use vars qw($VERSION @ISA $LANG);
 
-$VERSION = 0.47;
+$VERSION = 0.48;
 $LANG  = 'en_GB';
 @ISA     = qw(Exporter Math::Currency);
 
