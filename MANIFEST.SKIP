@@ -1,0 +1,13 @@
+\.lwpcookies
+\.releaserc
+.+\.diff
+.+\.patch
+.+\.bak
+.+~
+.+\.orig
+.+\.rej
+.hg
+.shipit
+Makefile$
+MYMETA.yml
+Math-Currency-.+.tar.gz
