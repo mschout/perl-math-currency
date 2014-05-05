@@ -8,6 +8,7 @@ LICENSE
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
+META.json
 META.yml
 README
 scripts/new_currency
