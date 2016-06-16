@@ -376,6 +376,14 @@ sub unknown_currency    #02/03/05 4:37am
 {
     my ($currency) = @_;
     $DB::single=1;
+
+    # remember current locale
+    my $original_locale = setlocale( LC_ALL );
+
+    # we need to save a copy of $VERSION here becuase the effective locale can
+    # render $VERSION as X,YY instead of Y.YY for exmaple
+    my $version = "$VERSION";
+
     open LOCALES, "-|", "locale -a";
     while (my $LOCALE = <LOCALES>) {
         chomp($LOCALE);
@@ -395,14 +403,14 @@ sub unknown_currency    #02/03/05 4:37am
 package Math::Currency::${LOCALE};
 use vars qw(\$VERSION \@ISA \$LANG);
 
-\$VERSION = $Math::Currency::VERSION;
+\$VERSION = $version;
 \$LANG  = '$LOCALE';
 \@ISA = qw/Math::Currency/;
 1;
 package Math::Currency::${int_curr};
 use vars qw(\$VERSION \@ISA \$LANG);
 
-\$VERSION = $Math::Currency::VERSION;
+\$VERSION = $version;
 \$LANG  = '$LOCALE';
 \@ISA = qw/Math::Currency/;
 1;
@@ -411,6 +419,9 @@ EOP
         }
     }
     close LOCALES;
+
+    # restore the original locale
+    setlocale( LC_ALL, $original_locale );
 }
 
 # additional methods needed to get/set package globals
