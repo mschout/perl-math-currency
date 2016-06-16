@@ -25,6 +25,8 @@ use Math::BigFloat 1.60;
 use overload '""' => \&bstr;
 use POSIX qw(locale_h);
 
+use constant _LEGACY_MATH_BIGINT => (Math::BigInt->VERSION <= '1.999717');
+
 @ISA = qw(Exporter Math::BigFloat);
 
 # Items to export into callers namespace by default. Note: do not export
@@ -317,7 +319,8 @@ sub as_int {
 # we override the default here because we only want to compare the precision of
 # the currency we're dealing with, not the precision of the underlying object
 sub bcmp {
-    my $class = shift;
+    # must use package for Math::BigInt >= 1.999717. See RT #115247
+    my $class = _LEGACY_MATH_BIGINT ? shift : __PACKAGE__;
 
     # make sure we're dealing with two Math::Currency objects
     my ( $x, $y ) =
