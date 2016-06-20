@@ -1,4 +1,5 @@
 use Test::More tests => 6;
+use POSIX qw(setlocale);
 
 BEGIN { use_ok( Math::Currency ); }
 
@@ -10,8 +11,19 @@ is ( $floating, '$12.34', 'Individual currency object');
 my $dollars = Math::Currency->new("12.34",'USD'); # force to dollars
 is ( $dollars, '$12.34', 'Individual currency object');
 
-$format = Math::Currency->format("GBP"); #change default currency
-ok ( $format->{INT_CURR_SYMBOL} =~ /GBP/, 'Default currency changed');
+SKIP: {
+    skip 'en_GB locale is not available on this system', 3, unless have_locale('en_GB');
+    $format = Math::Currency->format("GBP"); #change default currency
+    ok ( $format->{INT_CURR_SYMBOL} =~ /GBP/, 'Default currency changed');
 
-is ( $dollars, '$12.34', 'Object did not change to new default currency');
-isnt ( $floating, '$12.34', 'Object changed to new default currency');
+    is ( $dollars, '$12.34', 'Object did not change to new default currency');
+    isnt ( $floating, '$12.34', 'Object changed to new default currency');
+}
+
+sub have_locale {
+    my $wanted = shift;
+
+    my $locale = setlocale(LC_ALL, $wanted) || '';
+
+    return $locale eq $wanted;
+}
