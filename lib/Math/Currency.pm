@@ -18,12 +18,15 @@ eval 'exec /usr2/local/bin/perl -S $0 ${1+"$@"}'
 package Math::Currency;
 
 use strict;
+use utf8;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $PACKAGE $FORMAT $LC_MONETARY
   $accuracy $precision $div_scale $round_mode $use_int $always_init);
 use Exporter;
 use Math::BigFloat 1.60;
 use overload '""' => \&bstr;
 use POSIX qw(locale_h);
+use Encode::Locale;
+use Encode ();
 
 use constant _LEGACY_MATH_BIGINT => (Math::BigInt->VERSION <= '1.999717');
 
@@ -337,6 +340,20 @@ sub localize    #08/17/02 7:58:PM
     my $format = shift || \$FORMAT;
 
     my $localeconv = POSIX::localeconv(); 
+
+    # localeconv()'s character encoding depends on the current locale setting,
+    # so it is necessary to decode the currency symbol.
+    Encode::Locale::reinit(); # neede in case locale was changed with setlocale()
+
+    for my $key (keys %$localeconv) {
+        # POSIX::localeconv() changed behaviour between 5.20 and 5.22.  As of
+        # 5.22, it sets the UTF-8 flag for localeconv() returned data if hte
+        # data is in UTF-8 format, so if POSIX::localeconv() already turned on
+        # the UTF-8 flag, we should not decode the data.
+        unless (utf8::is_utf8($$localeconv{$key})) {
+            $$localeconv{$key} = Encode::decode(locale => $$localeconv{$key});
+        }
+    }
 
     # so you can test to see if locale was effective
     return 0 if ! exists $localeconv->{'currency_symbol'};

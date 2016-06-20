@@ -23,7 +23,7 @@ SKIP: {
 sub have_locale {
     my $wanted = shift;
 
-    my $locale = setlocale(LC_ALL, $wanted) || '';
+    my $locale = setlocale(&POSIX::LC_ALL, $wanted) || '';
 
     return $locale eq $wanted;
 }

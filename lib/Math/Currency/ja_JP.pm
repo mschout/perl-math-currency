@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 package Math::Currency::ja_JP;
 
+use utf8;
 use Exporter;
 use Math::Currency qw($LC_MONETARY $FORMAT);
 use vars qw($VERSION @ISA $LANG);

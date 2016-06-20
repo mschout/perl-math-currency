@@ -15,7 +15,7 @@ scripts/new_currency
 t/001_load.t
 t/002_basic.t
 t/003_subclass.t
-t/004_localize.t.pl
+t/004_localize.t
 t/005_rounding.t
 t/006_defaults.t
 t/007_comparison.t

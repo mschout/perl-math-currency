@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 package Math::Currency::en_GB;
 
+use utf8;
 use Exporter;
 use Math::Currency qw($LC_MONETARY $FORMAT);
 use vars qw($VERSION @ISA $LANG);
@@ -11,7 +12,7 @@ $LANG  = 'en_GB';
 
 $LC_MONETARY->{en_GB} = {
 	INT_CURR_SYMBOL	=>	'GBP ',
-	CURRENCY_SYMBOL	=>	'£',
+	CURRENCY_SYMBOL	=>	'Â£',
 	MON_DECIMAL_POINT	=>	'.',
 	MON_THOUSANDS_SEP	=>	',',
 	MON_GROUPING	=>	'3',
