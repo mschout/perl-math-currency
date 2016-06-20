@@ -369,6 +369,26 @@ sub localize    #08/17/02 7:58:PM
     return 1;
 }
 
+{
+    my $locales;
+    sub available_locales {
+        unless (defined $locales) {
+            $locales = [];
+
+            open my $fh, '-|', 'locale -a' or die $!;
+
+            while (my $locale = <$fh>) {
+                chomp $locale;
+                push @$locales, $locale;
+            }
+
+            close $fh;
+        }
+
+        return @$locales;
+    }
+}
+
 ############################################################################
 sub unknown_currency    #02/03/05 4:37am
 ############################################################################
@@ -384,22 +404,18 @@ sub unknown_currency    #02/03/05 4:37am
     # render $VERSION as X,YY instead of Y.YY for exmaple
     my $version = "$VERSION";
 
-    open LOCALES, "-|", "locale -a";
-    while (my $LOCALE = <LOCALES>) {
-        chomp($LOCALE);
+    for my $LOCALE (available_locales()) {
         setlocale( LC_ALL, $LOCALE );
         my $localeconv = POSIX::localeconv();
-	if ( $LOCALE eq $currency || 
-	    (defined $localeconv->{'int_curr_symbol'}
-             and $localeconv->{'int_curr_symbol'} =~ /$currency/ )
-	   )
+        if ( $LOCALE eq $currency or
+            ($localeconv->{int_curr_symbol} || '') =~ /$currency/ )
         {
             my $format = \$LC_MONETARY->{$currency};
             Math::Currency->localize($format);
-	    (my $int_curr = $$format->{'INT_CURR_SYMBOL'}) =~  s/ //g;
-	    $LC_MONETARY->{$int_curr} = $LC_MONETARY->{$currency}
-		unless exists $LC_MONETARY->{$int_curr};	
-	    eval <<"EOP";
+            (my $int_curr = $$format->{INT_CURR_SYMBOL}) =~  s/ //g;
+            $LC_MONETARY->{$int_curr} = $LC_MONETARY->{$currency}
+                unless exists $LC_MONETARY->{$int_curr};
+            eval <<"EOP";
 package Math::Currency::${LOCALE};
 use vars qw(\$VERSION \@ISA \$LANG);
 
@@ -418,7 +434,6 @@ EOP
             last;
         }
     }
-    close LOCALES;
 
     # restore the original locale
     setlocale( LC_ALL, $original_locale );
