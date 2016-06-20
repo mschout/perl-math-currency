@@ -41,7 +41,7 @@ use constant _LEGACY_MATH_BIGINT => (Math::BigInt->VERSION <= '1.999717');
   Money
 );
 
-$VERSION = 0.48;
+$VERSION = 0.49;
 
 $PACKAGE = __PACKAGE__;
 
