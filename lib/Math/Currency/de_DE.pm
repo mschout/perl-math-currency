@@ -29,6 +29,7 @@ $LC_MONETARY->{de_DE} = {
 
 package Math::Currency::USD;
 use base "Math::Currency::de_DE";
+$VERSION = $Math::Currency::de_DE::VERSION;
 $LC_MONETARY->{USD} = \$LC_MONETARY->{de_DE};
 
 1;
