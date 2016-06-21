@@ -32,9 +32,9 @@ my @items = qw(
     N_SIGN_POSN);
 
 subtest 'en_GB locale' => sub {
-    use_ok("Math::Currency::en_GB");
-
     plan_locale(en_GB => 21);
+
+    use_ok("Math::Currency::en_GB");
 
     pass 'Initalized with en_GB locale';
 
