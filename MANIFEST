@@ -20,3 +20,4 @@ t/005_rounding.t
 t/006_defaults.t
 t/007_comparison.t
 t/008_restore_locale.t
+t/009_localeconv_encoding.t
