@@ -19,6 +19,7 @@ my $m = $class->new(
         'Math::BigFloat'   => '1.60',
         'Encode::Locale'   => 0,
         'Encode'           => 0,
+        'Test::More'       => '0.94',  # for subtest() support
         'Test::More::UTF8' => 0,
         'version'          => 0
     },
