@@ -1,11 +1,15 @@
-use Test::More qw(no_plan);
+#!/usr/bin/env perl
 
-BEGIN { use_ok('Math::Currency') };
+use Test::More tests => 4;
+
+use_ok 'Math::Currency';
 
 # For subsequent testing, we need to make sure that format is default US
 Math::Currency->format('USD');
 
 subtest '==' => sub {
+    plan tests => 4;
+
     my $object = Math::Currency->new('19.95');
     my $scalar = 19.95;
 
@@ -17,7 +21,11 @@ subtest '==' => sub {
 };
 
 subtest '<=' => sub {
+    plan tests => 2;
+
     subtest '==' => sub {
+        plan tests => 4;
+
         my $object = Math::Currency->new('19.95');
         my $scalar = 19.95;
 
@@ -29,6 +37,8 @@ subtest '<=' => sub {
     };
 
     subtest '<=' => sub {
+        plan tests => 4;
+
         my $lesser_object  = Math::Currency->new('15.00');
         my $lesser_scalar  = 15.00;
         my $greater_object = Math::Currency->new('19.95');
@@ -43,7 +53,11 @@ subtest '<=' => sub {
 };
 
 subtest '>=' => sub {
+    plan tests => 2;
+
     subtest '==' => sub {
+        plan tests => 4;
+
         my $object = Math::Currency->new('19.95');
         my $scalar = 19.95;
 
@@ -55,6 +69,8 @@ subtest '>=' => sub {
     };
 
     subtest '>=' => sub {
+        plan tests => 4;
+
         my $lesser_object  = Math::Currency->new('15.00');
         my $lesser_scalar  = 15.00;
         my $greater_object = Math::Currency->new('19.95');
