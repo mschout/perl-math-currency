@@ -19,6 +19,7 @@ package Math::Currency;
 
 use strict;
 use utf8;
+use version;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $PACKAGE $FORMAT $LC_MONETARY
   $accuracy $precision $div_scale $round_mode $use_int $always_init);
 use Exporter;
@@ -28,7 +29,8 @@ use POSIX qw(locale_h);
 use Encode::Locale;
 use Encode ();
 
-use constant _LEGACY_MATH_BIGINT => (Math::BigInt->VERSION <= '1.999717');
+use constant _LEGACY_MATH_BIGINT => 
+    (version->parse(Math::BigInt->VERSION) <= version->parse('1.999717'));
 
 @ISA = qw(Exporter Math::BigFloat);
 
