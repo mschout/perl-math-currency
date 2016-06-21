@@ -17,9 +17,9 @@ my %locales = (
     'en_GB'           => '£',
     'en_GB.UTF-8'     => '£',
     'en_GB.ISO8859-1' => '£',
-    'ru_RU'           => 'руб.',
-    'ru_RU.UTF-8'     => 'руб.',
-    'ru_RU.KOI8-R'    => 'руб.',
+    'ru_RU'           => qr/руб/,  # on some systems, this is 'руб', on others is 'руб.'
+    'ru_RU.UTF-8'     => qr/руб/,
+    'ru_RU.KOI8-R'    => qr/руб/,
     'zh_CN.GB2312'    => '￥',
     'zh_CN'           => '￥',
     'zh_CN.GB2312'    => '￥',
@@ -32,7 +32,13 @@ while (my ($locale, $symbol) = each %locales) {
     subtest $locale => sub {
         plan_locale($locale, 1);
         Math::Currency->localize(\$format);
-        is $$format{CURRENCY_SYMBOL}, $symbol, "Currency symbol $symbol decoded correctly";
+
+        if ((ref $symbol || '') eq 'Regexp') {
+            like $$format{CURRENCY_SYMBOL}, $symbol, 'Currency symbol decoded correctly';
+        }
+        else {
+            is $$format{CURRENCY_SYMBOL}, $symbol, "Currency symbol $symbol decoded correctly";
+        }
     };
 }
 
