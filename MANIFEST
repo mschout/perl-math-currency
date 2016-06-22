@@ -25,3 +25,4 @@ t/007_comparison.t
 t/008_restore_locale.t
 t/009_localeconv_encoding.t
 t/lib/My/Test/Util.pm
+t/999_locale_de_DE.t

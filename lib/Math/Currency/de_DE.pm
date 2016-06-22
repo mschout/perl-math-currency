@@ -1,28 +1,32 @@
-#!/usr/bin/perl -w
 package Math::Currency::de_DE;
 
+use utf8;
+use strict;
+use warnings;
 use Math::Currency qw($LC_MONETARY $FORMAT);
 use base qw(Exporter Math::Currency);
 
-our $VERSION = 0.49;
-our $LANG  = 'de_DE';
+our $VERSION = '0.49';
+our $LANG    = 'de_DE';
 
 $LC_MONETARY->{de_DE} = {
-    INT_CURR_SYMBOL   => 'USD ',
-    CURRENCY_SYMBOL   => '$',
-    MON_DECIMAL_POINT => '.',
-    MON_THOUSANDS_SEP => ',',
-    MON_GROUPING      => '3',
-    POSITIVE_SIGN     => '',
-    NEGATIVE_SIGN     => '-',
-    INT_FRAC_DIGITS   => '2',
+    CURRENCY_SYMBOL   => 'Eu',
     FRAC_DIGITS       => '2',
-    P_CS_PRECEDES     => '1',
-    P_SEP_BY_SPACE    => '0',
+    INT_CURR_SYMBOL   => 'EUR ',
+    INT_FRAC_DIGITS   => '2',
+    MON_DECIMAL_POINT => ',',
+    MON_GROUPING      => '3',
+    MON_THOUSANDS_SEP => '.',
+    NEGATIVE_SIGN     => '-',
     N_CS_PRECEDES     => '1',
     N_SEP_BY_SPACE    => '0',
-    P_SIGN_POSN       => '1',
-    N_SIGN_POSN       => '1'
+    N_SIGN_POSN       => '1',
+    POSITIVE_SIGN     => '',
+    P_CS_PRECEDES     => '1',
+    P_SEP_BY_SPACE    => '0',
+    P_SIGN_POSN       => '1'
 };
+
+require Math::Currency::EUR;
 
 1;
