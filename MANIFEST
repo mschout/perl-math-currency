@@ -21,3 +21,4 @@ t/006_defaults.t
 t/007_comparison.t
 t/008_restore_locale.t
 t/009_localeconv_encoding.t
+t/lib/My/Test/Util.pm

@@ -1,8 +1,10 @@
 #!/usr/bin/env perl
 
+use utf8;
 use strict;
 use warnings;
-use utf8;
+use lib 't/lib';
+use My::Test::Util;
 use Test::More tests => 12;
 use Test::More::UTF8;
 use POSIX qw(setlocale);
@@ -40,18 +42,4 @@ while (my ($locale, $symbol) = each %locales) {
             is $$format{CURRENCY_SYMBOL}, $symbol, "Currency symbol $symbol decoded correctly";
         }
     };
-}
-
-sub plan_locale {
-    my ($wanted, $tests) = @_;
-
-    my $locale = POSIX::setlocale(&POSIX::LC_ALL, $wanted) || '';
-
-    unless ($locale eq $wanted) {
-        plan skip_all => "locale $wanted is not available on this system";
-    }
-    else {
-        plan tests => $tests + 1;
-        pass "locale changed to $wanted";
-    }
 }

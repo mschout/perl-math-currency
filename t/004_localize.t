@@ -2,6 +2,8 @@
 
 use strict;
 use warnings;
+use lib 't/lib';
+use My::Test::Util;
 use Test::More;
 use Test::More::UTF8;
 use Math::Currency qw($LC_MONETARY);
@@ -64,25 +66,6 @@ subtest 'en_US locale' => sub {
 
     check_params('en_US');
 };
-
-sub plan_locale {
-    my ($wanted, $tests) = @_;
-
-    $tests += 1; # add 1 for the "Re-initialized" test pass
-
-    my $locale = POSIX::setlocale( &POSIX::LC_ALL, $wanted ) || '';
-    if ($locale ne $wanted) {
-        plan skip_all => 'locale en_GB is not available on this system';
-    }
-    elsif (! Math::Currency->localize()) {
-        plan skip_all => 'No locale support';
-    }
-    else {
-        plan tests => $tests;
-
-        pass "Re-initalized locale with $wanted";
-    }
-}
 
 sub check_params {
     my $locale = shift;
