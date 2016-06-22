@@ -391,6 +391,8 @@ sub localize    #08/17/02 7:58:PM
 {
     my $locales;
     sub available_locales {
+        return if $^O =~ /Win32/; # cant run locale -a on windows
+
         unless (defined $locales) {
             $locales = [];
 
