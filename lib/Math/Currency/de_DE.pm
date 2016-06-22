@@ -1,35 +1,28 @@
 #!/usr/bin/perl -w
 package Math::Currency::de_DE;
 
-use Exporter;
 use Math::Currency qw($LC_MONETARY $FORMAT);
-use vars qw($VERSION @ISA $LANG);
+use base qw(Exporter Math::Currency);
 
-$VERSION = 0.49;
-$LANG  = 'de_DE';
-@ISA     = qw(Exporter Math::Currency);
+our $VERSION = 0.49;
+our $LANG  = 'de_DE';
 
 $LC_MONETARY->{de_DE} = {
-	INT_CURR_SYMBOL	=>	'USD ',
-	CURRENCY_SYMBOL	=>	'$',
-	MON_DECIMAL_POINT	=>	'.',
-	MON_THOUSANDS_SEP	=>	',',
-	MON_GROUPING	=>	'3',
-	POSITIVE_SIGN	=>	'',
-	NEGATIVE_SIGN	=>	'-',
-	INT_FRAC_DIGITS	=>	'2',
-	FRAC_DIGITS	=>	'2',
-	P_CS_PRECEDES	=>	'1',
-	P_SEP_BY_SPACE	=>	'0',
-	N_CS_PRECEDES	=>	'1',
-	N_SEP_BY_SPACE	=>	'0',
-	P_SIGN_POSN	=>	'1',
-	N_SIGN_POSN	=>	'1',
+    INT_CURR_SYMBOL   => 'USD ',
+    CURRENCY_SYMBOL   => '$',
+    MON_DECIMAL_POINT => '.',
+    MON_THOUSANDS_SEP => ',',
+    MON_GROUPING      => '3',
+    POSITIVE_SIGN     => '',
+    NEGATIVE_SIGN     => '-',
+    INT_FRAC_DIGITS   => '2',
+    FRAC_DIGITS       => '2',
+    P_CS_PRECEDES     => '1',
+    P_SEP_BY_SPACE    => '0',
+    N_CS_PRECEDES     => '1',
+    N_SEP_BY_SPACE    => '0',
+    P_SIGN_POSN       => '1',
+    N_SIGN_POSN       => '1'
 };
-
-package Math::Currency::USD;
-use base "Math::Currency::de_DE";
-$VERSION = $Math::Currency::de_DE::VERSION;
-$LC_MONETARY->{USD} = \$LC_MONETARY->{de_DE};
 
 1;

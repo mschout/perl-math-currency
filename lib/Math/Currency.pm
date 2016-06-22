@@ -12,45 +12,26 @@
 #   with the exception that it cannot be placed on a CD-ROM or similar media
 #   for commercial distribution without the prior approval of the author.
 #------------------------------------------------------------------------------
-eval 'exec /usr2/local/bin/perl -S $0 ${1+"$@"}'
-  if 0;
 
 package Math::Currency;
 
 use strict;
 use utf8;
 use version;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $PACKAGE $FORMAT $LC_MONETARY
-  $accuracy $precision $div_scale $round_mode $use_int $always_init);
-use Exporter;
+use base qw(Exporter Math::BigFloat);
 use Math::BigFloat 1.60;
-use overload '""' => \&bstr;
 use POSIX qw(locale_h);
 use Encode::Locale;
 use Encode ();
 
-use constant _LEGACY_MATH_BIGINT => 
+use overload '""' => \&bstr;
+
+use constant _LEGACY_MATH_BIGINT =>
     (version->parse(Math::BigInt->VERSION) <= version->parse('1.999717'));
 
-@ISA = qw(Exporter Math::BigFloat);
+our $VERSION = 0.49;
 
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
-@EXPORT = qw(
-);
-
-@EXPORT_OK = qw(
-  $LC_MONETARY
-  $FORMAT
-  Money
-);
-
-$VERSION = 0.49;
-
-$PACKAGE = __PACKAGE__;
-
-$LC_MONETARY = {
+our $LC_MONETARY = {
     en_US => {
         INT_CURR_SYMBOL   => 'USD ',
         CURRENCY_SYMBOL   => '$',
@@ -71,18 +52,21 @@ $LC_MONETARY = {
 };
 $LC_MONETARY->{USD} = $LC_MONETARY->{en_US};
 
-unless ( localize() )    # no locale information available
-{
-    $FORMAT = $LC_MONETARY->{en_US};
-}
+our $FORMAT = $LC_MONETARY->{en_US} unless localize();
+
+our @EXPORT_OK = qw(
+    $LC_MONETARY
+    $FORMAT
+    Money
+);
 
 # Set class constants
-$round_mode = 'even';    # Banker's rounding obviously
-$accuracy   = undef;
-$precision = $FORMAT->{FRAC_DIGITS} > 0 ? -$FORMAT->{FRAC_DIGITS} : 0;
-$div_scale = 40;
-$use_int   = 0;
-$always_init = 0;        # should the localize() happen every time?
+our $round_mode = 'even';    # Banker's rounding obviously
+our $accuracy   = undef;
+our $precision = $FORMAT->{FRAC_DIGITS} > 0 ? -$FORMAT->{FRAC_DIGITS} : 0;
+our $div_scale = 40;
+our $use_int   = 0;
+our $always_init = 0;        # should the localize() happen every time?
 
 # Preloaded methods go here.
 ############################################################################
@@ -111,10 +95,9 @@ sub new                  #05/10/99 3:13:PM
     my $currency = shift;
     my $format;
 
-    if ( not defined $currency and $class->isa($PACKAGE) ) {
-
+    if ( not defined $currency and $class->isa('Math::Currency') ) {
         # must be one of our subclasses
-        $currency = $1 if ($class =~ /$PACKAGE\:\:(\w+)/);
+        $currency = $1 if ($class =~ /Math::Currency::(\w+)/);
     }
 
     if ( defined $currency )    #override default currency type
@@ -154,8 +137,8 @@ sub Money    #05/10/99 4:16:PM
 ############################################################################
 
 {
-    return $PACKAGE->new(@_);
-}            ##Money
+    return __PACKAGE__->new(@_);
+}
 
 ############################################################################
 sub bstr     #05/10/99 3:52:PM
@@ -438,18 +421,20 @@ sub unknown_currency    #02/03/05 4:37am
                 unless exists $LC_MONETARY->{$int_curr};
             eval <<"EOP";
 package Math::Currency::${LOCALE};
-use vars qw(\$VERSION \@ISA \$LANG);
 
-\$VERSION = $version;
-\$LANG  = '$LOCALE';
-\@ISA = qw/Math::Currency/;
+use base 'Math::Currency';
+our \$VERSION = $version;
+our \$LANG  = '$LOCALE';
+
 1;
-package Math::Currency::${int_curr};
-use vars qw(\$VERSION \@ISA \$LANG);
 
-\$VERSION = $version;
-\$LANG  = '$LOCALE';
-\@ISA = qw/Math::Currency/;
+package Math::Currency::${int_curr};
+
+use base 'Math::Currency';
+
+our \$VERSION = $version;
+our \$LANG  = '$LOCALE';
+
 1;
 EOP
             last;
