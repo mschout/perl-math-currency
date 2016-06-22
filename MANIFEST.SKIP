@@ -8,6 +8,11 @@
 .+\.rej
 .hg
 .shipit
+.git
+blib
+_build
+^Build$
 Makefile$
 MYMETA.yml
 Math-Currency-.+.tar.gz
+^MYMETA\.json$
