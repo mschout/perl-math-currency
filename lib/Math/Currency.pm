@@ -15,6 +15,8 @@
 
 package Math::Currency;
 
+# ABSTRACT: Exact Currency Math with Formatting and Rounding
+
 use strict;
 use utf8;
 use version;
@@ -28,8 +30,6 @@ use overload '""' => \&bstr;
 
 use constant _LEGACY_MATH_BIGINT =>
     (version->parse(Math::BigInt->VERSION) <= version->parse('1.999717'));
-
-our $VERSION = 0.49;
 
 our $LC_MONETARY = {
     en_US => {
@@ -68,12 +68,22 @@ our $div_scale = 40;
 our $use_int   = 0;
 our $always_init = 0;        # should the localize() happen every time?
 
-# Preloaded methods go here.
-############################################################################
-sub new                  #05/10/99 3:13:PM
-############################################################################
+=method new
 
-{
+Create a new currency object.  This can be called a number of ways:
+
+=for :list
+* new()
+Creates a new currency object with value "0".
+* new($value)
+Creates a new currency object with the given value. Note that C<$value> should
+be quoted to avoid locale formatting issues.  E.g.: C<< new('1234.56') >>.
+* new($value, $curency)
+Creates a new currency object in the given locale.  See L<Predefined Locales>.
+
+=cut
+
+sub new {
     my $proto  = shift;
     my $class  = ref($proto) || $proto;
     my $parent = $proto if ref($proto);
@@ -132,19 +142,18 @@ sub new                  #05/10/99 3:13:PM
     return $self;
 }    ##new
 
-############################################################################
-sub Money    #05/10/99 4:16:PM
-############################################################################
+=func Money
 
-{
+This an exportable function that constructs a new object.  Takes the same arguments
+as C<new()>.
+
+=cut
+
+sub Money {
     return __PACKAGE__->new(@_);
 }
 
-############################################################################
-sub bstr     #05/10/99 3:52:PM
-############################################################################
-
-{
+sub bstr {
     my $self     = shift;
     my $myformat = $self->format();
     my $value    = $self->as_float();
@@ -211,11 +220,14 @@ s/(\d{$myformat->{MON_GROUPING}})(?=\d)(?!\d*\.)/$1$myformat->{MON_THOUSANDS_SEP
     return $value;
 }    ##stringify
 
-############################################################################
-sub format    #05/17/99 1:58:PM
-############################################################################
 
-{
+=method format($key, $value)
+
+Set object or global formatting.  See L<Object Formats> for more information.
+
+=cut
+
+sub format {
     my $self  = shift;
     my $key   = shift;    # do they want to display or set?
     my $value = shift;    # did they supply a value?
@@ -271,12 +283,31 @@ sub format    #05/17/99 1:58:PM
     return $$source;
 }    ##format
 
+=method as_float
+
+Bare floating point notation without currency formatting.
+
+When storing the value into a database, you often need a string which
+corresponds to the value of the currency as a floating point number, but
+without the special currency formatting.  That is what this object method
+produces.  Be sure and use e.g. DECIMAL(10,2) in MySQL, or NUMERIC(10,3) in
+PostgreSQL to ensure that you don't have any floating point rounding issues
+going from/to the database.
+
+=cut
+
 sub as_float {
     my $self   = shift;
     my $format = $self->format;
     my $string = $self->copy->bfround( -$format->{FRAC_DIGITS} )->SUPER::bstr();
     return $string;
 }
+
+=method copy
+
+Returns a copy of the current Math::Currency object.
+
+=cut
 
 sub copy {
     my $self = shift;
@@ -297,6 +328,18 @@ sub copy {
     return $new;
 }
 
+
+=method as_int
+
+Some US credit card gateways require all transactions to be expressed in
+pennies.  This object method returns an integer value that corresponds to the
+currency value multiplied by 10 to the power of the number of decimal places of
+precision.  Essentially, this expresses the currency amount in the smallest
+discrete value allowed with that currency, so for currency expressed in 
+dollars, this method returns the same value in pennies.
+
+=cut
+
 sub as_int {
     my $self = shift;
     (my $str = $self->as_float) =~ s/\.//o;
@@ -312,15 +355,30 @@ sub bcmp {
 
     # make sure we're dealing with two Math::Currency objects
     my ( $x, $y ) =
-      map { ref $_ ne $class ? $class->new($_) : $_ } @_[ 0, 1 ];
+        map { ref $_ ne $class ? $class->new($_) : $_ } @_[ 0, 1 ];
+
     return $x->as_float <=> $y->as_float;
 }
 
-############################################################################
-sub localize    #08/17/02 7:58:PM
-############################################################################
+=method localize
 
-{
+Reinitialize the global (if called with no arguments), or local (if called with
+a reference to a hashref) format hash.
+
+If you don't want to always have to remember to reinitialize the POSIX settings
+when you switch locales, see L<always_init>
+
+Examples:
+
+=for :list
+* C<< Math::Currency->localize() >>
+Renitialize the global internal format hash using the current locale
+* C<< Math::Currency->localize(\$format) >>
+Renitialize the hashref C<$format> using the current locale.
+
+=cut
+
+sub localize {
     my $self   = shift;
     my $format = shift || \$FORMAT;
 
@@ -371,6 +429,12 @@ sub localize    #08/17/02 7:58:PM
     return 1;
 }
 
+=method available_locales
+
+Get the list of available locales on this system
+
+=cut
+
 {
     my $locales;
     sub available_locales {
@@ -393,20 +457,17 @@ sub localize    #08/17/02 7:58:PM
     }
 }
 
-############################################################################
-sub unknown_currency    #02/03/05 4:37am
-############################################################################
-
-{
+# if no currency module exists for the requested currency, this function tries
+# to find the currency settings from the available locales
+sub unknown_currency {
     my ($currency) = @_;
-    $DB::single=1;
 
     # remember current locale
     my $original_locale = setlocale( LC_ALL );
 
     # we need to save a copy of $VERSION here becuase the effective locale can
     # render $VERSION as X,YY instead of Y.YY for exmaple
-    my $version = "$VERSION";
+    my $version = "$Math::Currency::VERSION";
 
     for my $LOCALE (available_locales()) {
         setlocale( LC_ALL, $LOCALE );
@@ -447,36 +508,103 @@ EOP
 
 # additional methods needed to get/set package globals
 
+=method always_init
+
+If you don't want to always have to remember to reinitialize the POSIX settings
+when you switch locales, you can call this with a true value.
+
+ Math::Currency->always_init(1);
+
+Alternatively, you can set the global variable:
+
+ $Math::Currency::always_init = 1;
+
+and every single time a Math::Currency object is printed, the global $FORMAT
+will be updated to the locale current at that time.  This may be a performance
+hit.  It would be better if you followed the method of manually updating the
+global format immediately after you reset the locale.
+
+=head3 Notes
+
+=over 4
+
+=item *
+
+This function will reset only the global format and will not have effect on
+objects created with their own overridden formats, even if they were
+originally based on the global format.
+
+=item *
+
+You must have all the locale files in question already loaded; the list
+reported by C<locale -a> is not always a reliable judge of what files you might
+actually have installed.  If you try and set a nonexistant locale, or set the
+same locale as is already active, the module will silently retain the current
+locale settings.
+
+=back
+
+=cut
+
 sub always_init {
-    my ($class) = shift;
-    $always_init = shift if @_;
+    my $class = shift;
+
+    if (@_) {
+        $always_init = shift;
+    }
+
     return $always_init;
 }
 
+=method use_int
+
+Default: false
+
+Pass a true value to this to indicate that the international currency symbol
+(C<INT_CURR_SYMBOL>) should be used instead of local currency symbol
+(C<CURRENCY_SYMBOL>).  Note that this is a global setting for the library and
+will affect all objects.  For example, in the C<USD> locale, stringification of
+C<1234.56> looks like:
+
+=for :list
+* use_int(0)
+$1,234.56
+* use_int(1)
+USD 1,234.56
+
+=cut
+
 sub use_int {
-    my ($class) = shift;
-    $use_int = shift if @_;
+    my $class = shift;
+
+    if (@_) {
+        $use_int = shift;
+    }
+
     return $use_int;
 }
 
-# Autoload methods go after =cut, and are processed by the autosplit program.
-
 1;
+
 __END__
 
-=head1 NAME
+=encoding UTF-8
 
-Math::Currency - Exact Currency Math with Formatting and Rounding
+=for Pod::Coverage unknown_currency
 
 =head1 SYNOPSIS
 
  use Math::Currency qw(Money $LC_MONETARY);
- $dollar = Math::Currency->new("$12,345.67");
- $taxamt = $dollar * 0.28;
+
+ my $dollar = Math::Currency->new("$12,345.67");
+ my $taxamt = $dollar * 0.28;
+
  # this sets the default format for all objects w/o their own format
  Math::Currency->format('EUR');
- $euro = Money(12345.67);
- $euro_string = Money(12345.67)->bstr();
+
+ my $euro = Money(12345.67);
+ my $euro_string = Money(12345.67)->bstr();
+
  # or if you already have a Math::Currency object
  $euro_string = "$euro";
 
@@ -569,13 +697,6 @@ unsupported locales).  If you are using a locale in a country that uses the
 Euro, you should create your own local format file using your default LANG 
 setting, since the Euro formatting rules are country specific.
 
-B<IMPORTANT NOTE>: the predefined locales have been generated using non-UTF-8
-locales (since all of the above currencies have a native ASCII character
-available).  If you use a UTF-8 locale (common with more modern Linux distros),
-then the non-UTF-8 version will be used if found.  Some locales require the
-use of UTF-8 to represent their L<local currency|Currency Symbol>, so you must
-generate your own L<Custom Locale> to fully support that usage.
-
 If you want to use any locale other than your default in a single script, there
 are two different ways to specify which currency format you wish to use, with
 somewhat subtle differences:
@@ -594,7 +715,7 @@ program, use this mode:
 The last line above will automatically load the applicable subclass and
 use that formatting for that specific object.  These formats can either use
 a pre-generated subclass or will automatically generate an automatic
-L<Custom Locale>, 
+L<Custom Locale>,
 
 =back
 
@@ -614,7 +735,7 @@ rules, create the objects directly using the subclass:
 =head2 Currency Symbol
 
 The locale definition includes two different Currency Symbol strings: one
-is the native character(s), like $ or £ or ¥; the other is the three
+is the native character(s), like $ or Â£ or Â¥; the other is the three
 character string defined by the ISO4217 specification followed by the
 normal currency separation character (frequently space).  The default
 behavior is to always display the native CURRENCY_SYMBOL unless a global
@@ -686,24 +807,7 @@ at any time by using:
     Math::Currency->localize;    # reinitialize global format
 
 If you don't want to always have to remember to reinitialize the POSIX settings
-when you switch locales, you can set the global parameter:
-
-    $Math::Currency::always_init = 1;
-
-and every single time a M::C object is printed, the global $FORMAT will be
-updated to the locale current at that time.  This may be a performance hit.  It
-would be better if you followed the first method of manually updating the global
-format immediately after you reset the locale.
-
-NOTE: This function will reset only the global format and will not have
-effect on objects created with their own overridden formats, even if they were
-originally based on the global format.
-
-NOTE 2: You must have all the locale files in question already loaded; the list
-reported by `locale -a` is not always a reliable judge of what files you
-might actually have installed.  If you try and set a nonexistant locale,
-or set the same locale as is already active, the module will silently retain
-the current locale settings.
+when you switch locales, see L<always_init>
 
 =head2 Object Formats
 
@@ -777,49 +881,22 @@ parameters:
 
 (the negative variants are similar).
 
-=head2 Additional Object Methods
+=head1 SOURCE
 
-There are times when you would like to take a Math::Currency object and use
-it with some other module or external agent which doesn't understand the
-currency formatting.  
+The development version is on bitbucket at
+https://bitbucket.org/jpeacock/math-currency
 
-=over 4
+=head1 AUTHORS
 
-=item $m->as_float - bare floating point notation without currency formatting
-
-When storing the value into a database, you often need a string which
-corresponds to the value of the currency as a floating point number, but
-without the special currency formatting.  That is what this object method
-produces.  Be sure and use e.g. DECIMAL(10,2) in MySQL, to ensure that you
-don't have any floating point rounding issues going from/to the database.
-
-=item $m->as_int - bare integer number of "minimum value" 
-
-Some US credit card gateways require all transactions to be expressed in
-pennies (because their software isn't running Math::Currency!).  This
-object method returns an integer value that corresponds to the currency
-value multiplied by 10 to the power of the number of decimal places of
-precision.  Essentially, this expresses the currency amount in the smallest
-discrete value allowed with that currency, so for currency expressed in 
-dollars, this method returns the same value in pennies.
-
-=back
-
-=head1 BUGS
-
-Please report any bugs or feature requests to
-C<bug-Math-Currency@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org>.
-
-=head1 AUTHOR
-
-John Peacock <jpeacock@cpan.org>
+=for :list
+* John Peacock <jpeacock@cpan.org>
+* Michael Schout <mschout@gkg.net>
 
 =head1 SEE ALSO
 
- perl(1).
- perllocale
- Math::BigFloat
- Math::BigInt
+=for :list
+* perllocale
+* Math::BigFloat
+* Math::BigInt
 
 =cut

@@ -1,13 +1,14 @@
 package Math::Currency::de_DE;
 
+# ABSTRACT: de_DE Locale Module for Math::Currency
+
 use utf8;
 use strict;
 use warnings;
 use Math::Currency qw($LC_MONETARY $FORMAT);
 use base qw(Exporter Math::Currency);
 
-our $VERSION = '0.49';
-our $LANG    = 'de_DE';
+our $LANG = 'de_DE';
 
 $LC_MONETARY->{de_DE} = {
     CURRENCY_SYMBOL   => 'Eu',

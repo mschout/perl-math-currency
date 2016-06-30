@@ -10,9 +10,11 @@
 .shipit
 .git
 blib
+dist.ini
 _build
 ^Build$
 Makefile$
 MYMETA.yml
+MANIFEST.SKIP
 Math-Currency-.+.tar.gz
 ^MYMETA\.json$

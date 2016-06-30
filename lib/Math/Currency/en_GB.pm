@@ -1,5 +1,6 @@
-#!/usr/bin/perl -w
 package Math::Currency::en_GB;
+
+# ABSTRACT: en_GB Locale Module for Math::Currency
 
 use utf8;
 use strict;
@@ -7,7 +8,6 @@ use warnings;
 use Math::Currency qw($LC_MONETARY $FORMAT);
 use base qw(Exporter Math::Currency);
 
-our $VERSION = 0.49;
 our $LANG  = 'en_GB';
 
 $LC_MONETARY->{en_GB} = {
