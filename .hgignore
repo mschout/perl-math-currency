@@ -6,5 +6,9 @@ MYMETA.yml
 Makefile
 Math-Currency/
 Math-Currency-.*.tar.gz
+Math-Currency-*.tar.gz
+Math-Currency-.*/
+Math-Currency-*/
 _build/
+.build/
 blib/
