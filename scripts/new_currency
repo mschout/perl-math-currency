@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Getopt::Std;
-use Math::Currency 0.40 qw($LC_MONETARY);
+use Math::Currency qw($LC_MONETARY);
 use Fatal qw(open);
 
 Math::Currency->import('$LC_MONETARY');
@@ -33,7 +33,6 @@ my $format = {};
 Math::Currency->localize( \$format )
     or die "Cannot determine your locale currency format";
 
-my $version = $Math::Currency::VERSION;
 my ($localename) = split(/\./,$lang);
 
 generate_packages($localename);
@@ -54,13 +53,14 @@ sub generate_locale_class {
     my $package = << "EOL";
 package Math::Currency::${localename};
 
+# ABSTRACT: ${localename} Module for Math::Currency
+
 use utf8;
 use strict;
 use warnings;
 use Math::Currency qw(\$LC_MONETARY \$FORMAT);
 use base qw(Exporter Math::Currency);
 
-our \$VERSION = '$version';
 our \$LANG    = '$localename';
 
 \$LC_MONETARY->{$localename} = {
@@ -120,10 +120,11 @@ sub generate_currency_class {
     print $fh <<"EOL";
 package Math::Currency::${symbol_locale};
 
+# ABSTRACT: ${symbol_locale} Currency Module for Math::Currency
+
 use strict;
 use warnings;
 use base 'Math::Currency::${localename}';
-our \$VERSION = '$version';
 
 \$Math::Currency::LC_MONETARY->{$symbol_locale} =
     \$Math::Currency::LC_MONETARY->{$localename};
