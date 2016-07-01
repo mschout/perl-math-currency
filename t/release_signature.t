@@ -5,7 +5,7 @@
 use Test::More;
 use strict;
 
-unless ($ENV{RELEASE_TESTING} or $ENV{TEST_SIGNATURE}) {
+unless ($ENV{TEST_SIGNATURE}) {
     plan skip_all =>
         "Set the environment variable TEST_SIGNATURE to enable this test.";
 }
