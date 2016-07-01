@@ -19,7 +19,6 @@ package Math::Currency;
 
 use strict;
 use utf8;
-use version;
 use base qw(Exporter Math::BigFloat);
 use Math::BigFloat 1.60;
 use POSIX qw(locale_h);
@@ -27,9 +26,6 @@ use Encode::Locale;
 use Encode ();
 
 use overload '""' => \&bstr;
-
-use constant _LEGACY_MATH_BIGINT =>
-    (version->parse(Math::BigInt->VERSION) <= version->parse('1.999717'));
 
 our $LC_MONETARY = {
     en_US => {
@@ -350,8 +346,15 @@ sub as_int {
 # we override the default here because we only want to compare the precision of
 # the currency we're dealing with, not the precision of the underlying object
 sub bcmp {
-    # must use package for Math::BigInt >= 1.999717. See RT #115247
-    my $class = _LEGACY_MATH_BIGINT ? shift : __PACKAGE__;
+    # See RT #115247, #115761
+    # bcmp() might get called in comparison overoad as an object method with
+    # one arg, or, as a class method with two args depending on the version of
+    # Math::BigInt that is installed. Workaround is to check if @_ has three
+    # args, and if so, the first one is the class name.  Otherwise, the first
+    # arg is the left side is an object that bcmp() is called on.
+    # An alternate solution to this is to require Math::BigInt >= 1.999718
+    # which always uses bcmp() as an object method.
+    my $class = (@_ == 3) ? shift : __PACKAGE__;
 
     # make sure we're dealing with two Math::Currency objects
     my ( $x, $y ) =
