@@ -17,7 +17,7 @@ for ver in $(perlbrew list | grep -E 'perl-[0-9.]+$'); do
 
     [ -f Makefile ] && make distclean
     perl Makefile.PL
-    make test RELEASE_TESTING=1 TEST_SIGNATURE=1
+    make test AUTHOR_TESTING=1 RELEASE_TESTING=1 TEST_SIGNATURE=1
 
     sleep 3
 
