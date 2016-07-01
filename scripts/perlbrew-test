@@ -6,21 +6,25 @@ source $HOME/perl5/perlbrew/etc/bashrc
 
 for ver in $(perlbrew list | grep -E 'perl-[0-9.]+$'); do
     perlbrew use $ver
-    perlbrew lib delete @math-currency
-    perlbrew lib create @math-currency
+    perlbrew lib delete @math-currency >/dev/null 2>&1
+    perlbrew lib create @math-currency >/dev/null 2>&1
     perlbrew use @math-currency
+
+    echo "===============> $ver@math-currency <==============="
 
     cpanm -q --installdeps .
 
     # add release-testing modules
     cpanm --notest -q Test::Pod Test::Pod::Coverage Pod::Coverage::TrustPod Module::Signature
 
-    [ -f Makefile ] && make distclean
+    [ -f Makefile ] && make distclean >/dev/null
     perl Makefile.PL
     make test AUTHOR_TESTING=1 RELEASE_TESTING=1 TEST_SIGNATURE=1
 
     sleep 3
 
     perlbrew use $ver
-    perlbrew lib delete @math-currency
+    perlbrew lib delete @math-currency >/dev/null 2>&1
+
+    echo ""
 done
