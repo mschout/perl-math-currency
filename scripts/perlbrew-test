@@ -4,7 +4,7 @@
 
 # test this dist against every installed perlbrew perl on the local machine.
 
-for ver in $(perlbrew list | grep -E 'perl-[0-9.]+$'); do
+for ver in $(perlbrew list | grep -E 'perl-[0-9.]+$' | sed -e 's/^\*//'); do
     perlbrew use $ver
     perlbrew lib delete @math-currency >/dev/null 2>&1
     perlbrew lib create @math-currency >/dev/null 2>&1
