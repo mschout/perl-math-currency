@@ -12,6 +12,12 @@ for ver in $(perlbrew list | grep -E 'perl-[0-9.]+$' | sed -e 's/^\*//'); do
 
     echo "===============> $ver@math-currency <==============="
 
+    # if LEGACY_BIGINT is set, install v1.99 of BigInt.  This is to ensure we
+    # are compatible with older Math::BigInt and Math::BigFloat
+    if [ "$LEGACY_BIGINT" ]; then
+        cpanm -q FLORA/Math-BigInt-1.99.tar.gz
+    fi
+
     cpanm -q --installdeps .
 
     # add release-testing modules
