@@ -7,6 +7,7 @@ Revision history for Math::Currency
     - updated locale definition for de_DE
     - switch to Dist::Zilla for releases, Module::Build no longer required.
     - Make $obj->bcmp($val) work like Math::BigFloat says it should [Thanks Daniel]
+    - add en_US/USD locale modules
 
 0.49  2016-06-21
     - fix russian currency symbol test comparisons
