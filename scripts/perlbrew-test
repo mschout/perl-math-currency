@@ -1,0 +1,26 @@
+#!/bin/sh
+
+source $HOME/perl5/perlbrew/etc/bashrc
+
+# test this dist against every installed perlbrew perl on the local machine.
+
+for ver in $(perlbrew list | grep -E 'perl-[0-9.]+$'); do
+    perlbrew use $ver
+    perlbrew lib delete @math-currency
+    perlbrew lib create @math-currency
+    perlbrew use @math-currency
+
+    cpanm -q --installdeps .
+
+    # add release-testing modules
+    cpanm --notest -q Test::Pod Test::Pod::Coverage Pod::Coverage::TrustPod Module::Signature
+
+    [ -f Makefile ] && make distclean
+    perl Makefile.PL
+    make test RELEASE_TESTING=1 TEST_SIGNATURE=1
+
+    sleep 3
+
+    perlbrew use $ver
+    perlbrew lib delete @math-currency
+done
