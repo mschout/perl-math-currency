@@ -15,7 +15,7 @@ plan tests => 2;
 my $format = {};
 
 my %LocaleData = (
-    CURRENCY_SYMBOL   => 'Eu',
+    CURRENCY_SYMBOL   => '€',
     FRAC_DIGITS       => '2',
     INT_CURR_SYMBOL   => 'EUR ',
     INT_FRAC_DIGITS   => '2',
@@ -23,28 +23,47 @@ my %LocaleData = (
     MON_GROUPING      => '3',
     MON_THOUSANDS_SEP => '.',
     NEGATIVE_SIGN     => '-',
-    N_CS_PRECEDES     => '1',
-    N_SEP_BY_SPACE    => '0',
     N_SIGN_POSN       => '1',
     POSITIVE_SIGN     => '',
-    P_CS_PRECEDES     => '1',
-    P_SEP_BY_SPACE    => '0',
-    P_SIGN_POSN       => '1',
 );
 
+# NOTE: The following values are inconstent depending on system locale
+# definitions.  Therefore they are not tested:
+#    N_SEP_BY_SPACE
+#    N_CS_PRECEDES
+#    P_CS_PRECEDES
+#    P_SEP_BY_SPACE
+#    P_SIGN_POSN
+
+
+# there are several currency symbols here that the system locale
+# might use.  Any of these are acceptable.
+# - The string "Eu"
+# - The string "EUR"
+# - U+20AC  EURO SIGN
+# - U+20A0  EURO CURRENCY SIGN
+my @CurrencySymbols = ('Eu', 'EUR', '€', "\x{20a0}");
+
 subtest 'de_DE' => sub {
-    plan_locale(de_DE => 19);
+    plan_locale(de_DE => 14);
 
     use_ok('Math::Currency::de_DE');
 
     Math::Currency->localize(\$format);
 
     for my $param (sort keys %LocaleData) {
-        is $format->{$param}, $LocaleData{$param};
+        if ($param eq 'CURRENCY_SYMBOL') {
+            ok( grep { $format->{CURRENCY_SYMBOL} eq $_ } @CurrencySymbols );
+        }
+        else {
+            is $format->{$param}, $LocaleData{$param},
+                "format parameter $param = $LocaleData{$param}";
+        }
     }
 
     my $obj = new_ok 'Math::Currency', ['12345.67', 'de_DE'];
 
+    # stringification always uses the module LocaleData{CURRENCY_SYMBOL}
     ok index("$obj", $LocaleData{CURRENCY_SYMBOL}) != -1,
         'string contains currency symbol';
     ok index("$obj", $LocaleData{MON_THOUSANDS_SEP}) != -1,
@@ -52,18 +71,24 @@ subtest 'de_DE' => sub {
 };
 
 subtest 'EUR' => sub {
-    plan_locale(de_DE => 19);
+    plan_locale(de_DE => 14);
 
     use_ok('Math::Currency::EUR');
 
     Math::Currency->localize(\$format);
 
     for my $param (sort keys %LocaleData) {
-        is $format->{$param}, $LocaleData{$param};
+        if ($param eq 'CURRENCY_SYMBOL') {
+            ok( grep { $format->{CURRENCY_SYMBOL} eq $_ } @CurrencySymbols );
+        }
+        else {
+            is $format->{$param}, $LocaleData{$param};
+        }
     }
 
     my $obj = new_ok 'Math::Currency', ['12345.67', 'EUR'];
 
+    # stringification always uses the module LocaleData{CURRENCY_SYMBOL}
     ok index("$obj", $LocaleData{CURRENCY_SYMBOL}) != -1,
         'string contains currency symbol';
     ok index("$obj", $LocaleData{MON_THOUSANDS_SEP}) != -1,
