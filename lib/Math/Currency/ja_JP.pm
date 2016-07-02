@@ -12,7 +12,7 @@ our $LANG  = 'ja_JP';
 
 $LC_MONETARY->{ja_JP} = {
     INT_CURR_SYMBOL   => 'JPY ',
-    CURRENCY_SYMBOL   => '¥ ',
+    CURRENCY_SYMBOL   => '¥',
     MON_DECIMAL_POINT => '.',
     MON_THOUSANDS_SEP => ',',
     MON_GROUPING      => '3',

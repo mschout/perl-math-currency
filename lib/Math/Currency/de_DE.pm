@@ -11,7 +11,7 @@ use base qw(Exporter Math::Currency);
 our $LANG = 'de_DE';
 
 $LC_MONETARY->{de_DE} = {
-    CURRENCY_SYMBOL   => 'Eu',
+    CURRENCY_SYMBOL   => '€',
     FRAC_DIGITS       => '2',
     INT_CURR_SYMBOL   => 'EUR ',
     INT_FRAC_DIGITS   => '2',
@@ -19,12 +19,12 @@ $LC_MONETARY->{de_DE} = {
     MON_GROUPING      => '3',
     MON_THOUSANDS_SEP => '.',
     NEGATIVE_SIGN     => '-',
-    N_CS_PRECEDES     => '1',
-    N_SEP_BY_SPACE    => '0',
+    N_CS_PRECEDES     => '0',
+    N_SEP_BY_SPACE    => '1',
     N_SIGN_POSN       => '1',
     POSITIVE_SIGN     => '',
-    P_CS_PRECEDES     => '1',
-    P_SEP_BY_SPACE    => '0',
+    P_CS_PRECEDES     => '0',
+    P_SEP_BY_SPACE    => '1',
     P_SIGN_POSN       => '1'
 };
 
