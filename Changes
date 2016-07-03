@@ -1,6 +1,8 @@
 Revision history for Math::Currency
 
 {{$NEXT}}
+
+0.50  2016-07-03
     - do not try to run command "locale -a" on Windows
     - modernize code and clean up a bit
     - update new_currency script
