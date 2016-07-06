@@ -1,6 +1,7 @@
 Revision history for Math::Currency
 
 {{$NEXT}}
+    - add tests for legacy Math::BigInt bcmp() calling syntax
 
 0.50  2016-07-03
     - do not try to run command "locale -a" on Windows
