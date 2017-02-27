@@ -14,7 +14,7 @@
 #------------------------------------------------------------------------------
 
 package Math::Currency;
-$Math::Currency::VERSION = '0.50';
+$Math::Currency::VERSION = '0.51';
 # ABSTRACT: Exact Currency Math with Formatting and Rounding
 
 use strict;
@@ -471,7 +471,7 @@ Math::Currency - Exact Currency Math with Formatting and Rounding
 
 =head1 VERSION
 
-version 0.50
+version 0.51
 
 =head1 SYNOPSIS
 
@@ -922,6 +922,12 @@ parameters:
 
 (the negative variants are similar).
 
+=head1 HISTORY
+
+Created by John Peacock E<lt>jpeacock@cpan.orgE<gt> who maintained this module up to
+version 0.4502.  Versions 0.48 and later were maintained by Michael Schout
+E<lt>mschout@cpan.orgE<gt>
+
 =head1 SEE ALSO
 
 =over 4
@@ -942,27 +948,17 @@ Math::BigInt
 
 =head1 SOURCE
 
-The development version is on bitbucket at
-https://bitbucket.org/jpeacock/math-currency
+The development version is on github at L<http://github.com/mschout/perl-math-currency>
+and may be cloned from L<git://github.com/mschout/perl-math-currency.git>
 
 =head1 BUGS
 
 Please report any bugs or feature requests to bug-math-currency@rt.cpan.org or through the web interface at:
  http://rt.cpan.org/Public/Dist/Display.html?Name=Math-Currency
 
-=head1 AUTHORS
+=head1 AUTHOR
 
-=over 4
-
-=item *
-
-John Peacock <jpeacock@cpan.org>
-
-=item *
-
-Michael Schout <mschout@gkg.net>
-
-=back
+Michael Schout <mschout@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 

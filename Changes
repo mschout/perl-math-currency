@@ -1,5 +1,13 @@
 Revision history for Math::Currency
 
+0.51  2017-02-27
+    - Add tests for legacy Math::BigInt bcmp() calling syntax
+    - Update test for Ruble character changes in debian
+    - Update dist repo metadata to reflect mschout as maintainer
+    - Update POD to reflect mschout/github as maintainer and authoritative
+      repository
+    - Fix localeconv tests for FreeBSD 11
+
 0.50  2016-07-03
     - do not try to run command "locale -a" on Windows
     - modernize code and clean up a bit

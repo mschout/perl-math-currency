@@ -1,5 +1,5 @@
 package Math::Currency::de_DE;
-$Math::Currency::de_DE::VERSION = '0.50';
+$Math::Currency::de_DE::VERSION = '0.51';
 # ABSTRACT: de_DE Locale Module for Math::Currency
 
 use utf8;
@@ -42,7 +42,12 @@ Math::Currency::de_DE - de_DE Locale Module for Math::Currency
 
 =head1 VERSION
 
-version 0.50
+version 0.51
+
+=head1 SOURCE
+
+The development version is on github at L<http://github.com/mschout/perl-math-currency>
+and may be cloned from L<git://github.com/mschout/perl-math-currency.git>
 
 =head1 BUGS
 

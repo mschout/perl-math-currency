@@ -1,5 +1,5 @@
 package Math::Currency::JPY;
-$Math::Currency::JPY::VERSION = '0.50';
+$Math::Currency::JPY::VERSION = '0.51';
 # ABSTRACT: JPY Currency Module for Math::Currency
 
 use strict;
@@ -21,7 +21,12 @@ Math::Currency::JPY - JPY Currency Module for Math::Currency
 
 =head1 VERSION
 
-version 0.50
+version 0.51
+
+=head1 SOURCE
+
+The development version is on github at L<http://github.com/mschout/perl-math-currency>
+and may be cloned from L<git://github.com/mschout/perl-math-currency.git>
 
 =head1 BUGS
 
