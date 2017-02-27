@@ -1,6 +1,8 @@
 Revision history for Math::Currency
 
 {{$NEXT}}
+
+0.51  2017-02-27
     - Add tests for legacy Math::BigInt bcmp() calling syntax
     - Update test for Ruble character changes in debian
     - Update dist repo metadata to reflect mschout as maintainer
