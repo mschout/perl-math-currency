@@ -884,16 +884,11 @@ parameters:
 
 (the negative variants are similar).
 
-=head1 SOURCE
+=head1 HISTORY
 
-The development version is on bitbucket at
-https://bitbucket.org/jpeacock/math-currency
-
-=head1 AUTHORS
-
-=for :list
-* John Peacock <jpeacock@cpan.org>
-* Michael Schout <mschout@gkg.net>
+Created by John Peacock E<lt>jpeacock@cpan.orgE<gt> who maintained this module up to
+version 0.4502.  Versions 0.48 and later were maintained by Michael Schout
+E<lt>mschout@cpan.orgE<gt>
 
 =head1 SEE ALSO
 
