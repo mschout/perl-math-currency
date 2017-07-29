@@ -1,6 +1,7 @@
 Revision history for Math::Currency
 
 {{$NEXT}}
+    - make SEE ALSO pod entries clickable
 
 0.51  2017-02-27
     - Add tests for legacy Math::BigInt bcmp() calling syntax
