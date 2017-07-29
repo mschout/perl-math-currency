@@ -1,6 +1,8 @@
 Revision history for Math::Currency
 
 {{$NEXT}}
+
+0.52  2017-07-29
     - make SEE ALSO pod entries clickable
     - don't include .travis.yml in the build
     - make signature test a dzil author test
