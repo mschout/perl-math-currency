@@ -34,3 +34,4 @@ MYMETA.yml
 MANIFEST.SKIP
 Math-Currency-.+.tar.gz
 ^MYMETA\.json$
+^\.travis\.yml$
