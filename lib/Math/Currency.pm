@@ -894,7 +894,7 @@ E<lt>mschout@cpan.orgE<gt>
 
 =for :list
 * perllocale
-* Math::BigFloat
-* Math::BigInt
+* L<Math::BigFloat>
+* L<Math::BigInt>
 
 =cut
