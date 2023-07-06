@@ -402,7 +402,7 @@ sub localize {
     }
 
     # so you can test to see if locale was effective
-    return 0 if ! exists $localeconv->{'currency_symbol'};
+    return 0 if ! exists $localeconv->{'currency_symbol'} || $localeconv->{'currency_symbol'} eq '';
 
     $$format = {
         INT_CURR_SYMBOL   => $localeconv->{'int_curr_symbol'}   || '',
