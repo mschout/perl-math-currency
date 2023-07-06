@@ -1,6 +1,8 @@
 Revision history for Math::Currency
 
 {{$NEXT}}
+    - Fix localize() so that it works correctly for perl 5.37.7 where
+      currency_symbol is empty string
 
 0.52  2017-07-29
     - make SEE ALSO pod entries clickable
