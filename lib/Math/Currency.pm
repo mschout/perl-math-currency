@@ -253,14 +253,14 @@ sub format {
         }
     }
     else { # called as class method to set the default currency
-	if ( defined $key && not exists $FORMAT->{$key} ) {
-	    unless ( defined $LC_MONETARY->{$key} ) {
-		eval "require Math::Currency::$key";
-		unknown_currency($key) if $@;
-	    }
-	    $FORMAT = $LC_MONETARY->{$key};
-	    return $FORMAT;
-	}
+        if (defined $key && not exists $FORMAT->{$key}) {
+            unless (defined $LC_MONETARY->{$key}) {
+                eval "require Math::Currency::$key";
+                unknown_currency($key) if $@;
+            }
+            $FORMAT = $LC_MONETARY->{$key};
+            return $FORMAT;
+        }
     }
 
 
