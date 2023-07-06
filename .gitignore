@@ -12,3 +12,4 @@ Math-Currency-*/
 _build/
 .build/
 blib/
+.idea/
